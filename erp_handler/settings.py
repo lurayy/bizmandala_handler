@@ -25,7 +25,7 @@ SECRET_KEY = 'an_$)0wa21$-miy$(i0t(nhe!!r4y6!r!sco&yob3kii8m2@5j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -132,6 +132,6 @@ AUTH_USER_MODEL = 'user_handler.UserBase'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
-DOCKER_API_PROTOCOL = 'http'
-DOCKER_API_IP = '127.0.0.1'
-DOCKER_API_PORT = 2375
+docker_protocol = 'http'
+docker_ip = '127.0.0.1'
+docker_port = 2375
