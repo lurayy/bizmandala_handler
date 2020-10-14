@@ -109,6 +109,3 @@ class ERP(models.Model):
             return True
         except:
             return False
-     
-    
-

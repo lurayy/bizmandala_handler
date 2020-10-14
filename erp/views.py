@@ -33,5 +33,4 @@ class Container(View):
                     'status': container['Status'],
                 }
             )
-        print(containers_list)
         return JsonResponse({'container_list' : containers_list}, status = 200)
