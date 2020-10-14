@@ -5,13 +5,11 @@ import uuid
 import requests
 from erp_handler.settings import docker_ip, docker_port, docker_protocol
 
-
 def get_container_data(container_name):
     url = '{}://{}:{}/containers/json'.format(docker_protocol, docker_ip, docker_port)
     params = 'filters={"name":["{}"]}'.format(container_name)
     res = requests.get(url, params=params)
     return res.json()
-
 
 def container_creation(uuid):
     try:
@@ -35,7 +33,6 @@ def container_creation(uuid):
     except Exception as exp:
         return exp
 
-
 class ERP(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     user = models.ForeignKey(UserBase, on_delete=models.CASCADE)
@@ -46,6 +43,8 @@ class ERP(models.Model):
     has_container = models.BooleanField(default=False)
 
     container_id = models.TextField(blank=True, null=True)
+    db_container_id = models.TextField(blank=True, null=True)
+    network_id = models.TextField(blank=True, null=True)
     link = models.TextField(blank=True, null=True)
     ip = models.CharField(max_length=20, blank=True)
     is_active = models.BooleanField(default=True)
@@ -62,21 +61,54 @@ class ERP(models.Model):
         name = 'erp_'+str(self.uuid)
         network_name = 'erp_net_'+str(self.uuid)
         container = get_container_data(name)[0]
-        self.container_id = container['Id']
+        self.container_id = container['Id'] 
         self.ip = container['NetworkSettings']['Networks'][network_name]['IPAddress']
         self.link =  container['NetworkSettings']['Networks'][network_name]['IPAddress']
+        self.network_id = container['NetworkSettings']['Networks'][network_name]['NetworkID']
+        self.db_container_id = get_container_data('db_'+str(uuid))[0]['Id']
+        
         self.is_running = True
         self.has_container = True
         self.save()
     
     def stop_container(self):
-        url = '{}://{}:{}/containers/{}/stop'.format(docker_protocol, docker_ip, docker_port, self.container_id)
-        res = requests.post(url)
-        return res.json()
+        try:
+            url = '{}://{}:{}/containers/{}/stop'.format(docker_protocol, docker_ip, docker_port, self.container_id)
+            requests.post(url)
+            url = '{}://{}:{}/containers/{}/stop'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
+            requests.post(url)
+            return True
+        except:
+            return False
     
     def start_container(self):
-        url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.container_id)
-        res = requests.post(url)
-        return res.json()
+        try:
+            url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.container_id)
+            requests.post(url)
+            url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
+            requests.post(url)
+            return True
+        except:
+            return False
+    
+    def delete_container(self):
+        try:
+            url = '{}://{}:{}/containers/{}'.format(docker_protocol, docker_ip, docker_port, self.container_id)
+            requests.delete(url)
+            url = '{}://{}:{}/containers/{}'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
+            requests.delete(url)
+            url = '{}://{}:{}/networks/{}'.format(docker_protocol, docker_ip, docker_port, self.network_id)
+            requests.delete(url)
+            self.is_running = False
+            self.has_container = False
+            self.container_id = None
+            self.db_container_id = None
+            self.network_id = None
+            self.link = None
+            self.ip = None
+            return True
+        except:
+            return False
+     
     
 
