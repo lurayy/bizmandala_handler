@@ -3,6 +3,55 @@
 
 {% block content %}
 
-<h1>Add New ERP</h1>
+<h3>Add New ERP</h3>
+<br>
+
+<table width='50%'>
+    <tr>
+        <td>
+            Company
+        </td>
+        <td>
+            <input id='company' type="text">
+        </td>
+    </tr>
+
+    <tr>
+        <td>
+            Address
+        </td>
+        <td>
+            <input id='address' type="text">
+        </td>
+    </tr>
+    <tr>
+        <td> </td>
+    </tr>
+    <tr>
+        <td colspan="2" >
+            <button type="button" class="btn btn-success" onclick="create_container()">Create</button>
+        </td>
+    </tr>
+</table>
+
+<script>
+
+function create_container(){
+    data = {
+        'company' : $('#company').val(),
+        'address' : $('#address').val()
+    }
+    console.log(data)
+    $.ajax ({
+        type: 'POST',
+        url: '/api/v1/erp/new',
+        data: JSON.stringify(data),
+        success: function(data){
+            console.log(data);        
+    }
+    }); 
+}
+
+</script>
 
 {% endblock %}

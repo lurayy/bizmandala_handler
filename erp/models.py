@@ -39,9 +39,6 @@ class ERP(models.Model):
     company = models.CharField(max_length=255)
     address = models.TextField(max_length=255)
 
-    is_running = models.BooleanField(default=False)
-    has_container = models.BooleanField(default=False)
-
     container_id = models.TextField(blank=True, null=True)
     db_container_id = models.TextField(blank=True, null=True)
     network_id = models.TextField(blank=True, null=True)
@@ -53,8 +50,6 @@ class ERP(models.Model):
         return f'{self.company} {self.user}'
 
     def create_container(self):
-        if self.has_container:
-            raise Exception("Container already exsists.")
         x = container_creation(self.uuid)
         if x:
             raise Exception(str(x))
@@ -66,9 +61,6 @@ class ERP(models.Model):
         self.link =  container['NetworkSettings']['Networks'][network_name]['IPAddress']
         self.network_id = container['NetworkSettings']['Networks'][network_name]['NetworkID']
         self.db_container_id = get_container_data('db_'+str(uuid))[0]['Id']
-        
-        self.is_running = True
-        self.has_container = True
         self.save()
     
     def stop_container(self):
@@ -99,8 +91,6 @@ class ERP(models.Model):
             requests.delete(url)
             url = '{}://{}:{}/networks/{}'.format(docker_protocol, docker_ip, docker_port, self.network_id)
             requests.delete(url)
-            self.is_running = False
-            self.has_container = False
             self.container_id = None
             self.db_container_id = None
             self.network_id = None

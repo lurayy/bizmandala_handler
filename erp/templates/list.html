@@ -2,7 +2,44 @@
 {% extends 'dashboard.html' %}
 
 {% block content %}
+<br>
+<h3>Registered ERP</h3>
+<br>
+<table id='table_erp_list' style="width:100%" border-collapse="collapse"> 
+    <tr>
+        <th>
+            Company
+        </th>
+        <th>
+            Address
+        </th>
+        <th>
+            Status
+        </th>
+    </tr>
 
-<h1>Registered ERPs</h1>
+    <tr id='erp_list_data' >
+
+    </tr>
+</table>
+
+<script>
+$(document).ready(function(){
+    get_erps()
+}) 
+
+function get_erps(){
+    var xhttp = new XMLHttpRequest();
+    $.ajax ({
+        type: 'GET',
+        url: '/api/v1/erp/get',
+        success: function(data){
+            console.log(data);        
+    }
+    });
+}
+
+
+</script>
 
 {% endblock %}
