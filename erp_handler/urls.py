@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from erp.views import dashboard
+from user_handler.views import user_login
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/erp/',include('erp.urls')),
-    path('user/', include('user_handler.urls'))
+    path('user/', include('user_handler.urls')),
+    path('',user_login),
+    path('dashboard', dashboard)
 ]

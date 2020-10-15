@@ -2,9 +2,9 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.forms import ModelForm
 from .models import UserBase
+from django.contrib.auth import get_user_model
 
-
-class UserForm(UserCreationForm,ModelForm):
+class UserForm(UserCreationForm, ModelForm):
     username = forms.CharField(min_length=3, max_length=30)
     email = forms.EmailField(required = True)
     first_name = forms.CharField(required =  True)
@@ -12,8 +12,7 @@ class UserForm(UserCreationForm,ModelForm):
 
     class Meta(UserCreationForm):
         model = UserBase
-        fields = ['first_name','last_name','email','username']
-
+        fields = ['username','first_name','last_name','email']
 
 class LoginForm(forms.Form):
     username = forms.CharField()

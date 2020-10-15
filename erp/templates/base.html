@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mandala Biz</title>
+</head>
+<body>
+    {{ user.username }} {{ user.first_name }} {{  user.last_name }}<br> <a href="/user/logout" > <button type="button" value="Logout" >Logout</button> </a>
+    <hr>
+    <h1>ERPs Manager</h1>
+<table>
+    <tr>
+        <td>
+            <a href="/api/v1/erp/view/new"><button>Create ERP for new company</button></a>
+        </td>
+        <td>
+            <a href="/api/v1/erp/view/list"><button>List Registered ERPs</button></a>
+        </td>
+    </tr>
+</table>
+
+  {% block content %}
+  
+  {% endblock %}
+  
+</body>
+</html>

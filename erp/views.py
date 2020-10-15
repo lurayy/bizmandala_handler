@@ -6,6 +6,7 @@ from django.views.decorators.http import require_http_methods
 from erp.models import ERP
 from erp_handler.settings import docker_ip, docker_port, docker_protocol
 import requests
+from django.shortcuts import render
 
 
 class Container(View):
@@ -34,3 +35,16 @@ class Container(View):
                 }
             )
         return JsonResponse({'container_list' : containers_list}, status = 200)
+
+@login_required
+def dashboard(request):
+    return render(request, 'dashboard.html')
+
+@login_required
+def list_erps(request):
+    return render(request, 'list.html')
+
+@login_required
+def register_erp(request):
+    return render(request, 'register.html')
+
