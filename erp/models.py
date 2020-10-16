@@ -6,7 +6,7 @@ import requests
 from erp_handler.settings import docker_ip, docker_port, docker_protocol
 
 def get_container_data(name):
-    url = '{}://{}:{}/containers/json'.format(docker_protocol, docker_ip, docker_port)
+    url = '{}://{}:{}/containers/json?all=1'.format(docker_protocol, docker_ip, docker_port)
     params = 'filters={"name":["'+str(name)+'"]}'
     res = requests.get(url, params=params)
     return res.json()
@@ -74,14 +74,26 @@ class ERP(models.Model):
             return False
     
     def start_container(self):
-        try:
-            url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.container_id)
-            requests.post(url)
-            url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
-            requests.post(url)
-            return True
-        except:
-            return False
+        url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.container_id)
+        requests.post(url)
+        url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
+        requests.post(url)
+        id = self.id
+        erp_name = "erp_"+str(id)
+        cmd = 'docker exec {} /bin/bash service nginx start'.format(erp_name)
+        os.system(cmd)
+        network_name = 'erp_net_'+str(id)
+        container = get_container_data('erp_'+str(id))[0]
+        print(container)
+        self.container_id = container['Id'] 
+        self.ip = container['NetworkSettings']['Networks'][network_name]['IPAddress']
+        self.link =  container['NetworkSettings']['Networks'][network_name]['IPAddress']
+        self.network_id = container['NetworkSettings']['Networks'][network_name]['NetworkID']
+        self.db_container_id = get_container_data('db_'+str(id))[0]['Id']
+        print("link: ",self.link)
+        self.save()
+        return True
+
     
     def delete_container(self):
         try:

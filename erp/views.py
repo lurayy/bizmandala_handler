@@ -7,6 +7,7 @@ from erp_handler.settings import docker_ip, docker_port, docker_protocol
 import requests
 from django.shortcuts import render
 from erp.utils import erps_to_json
+from django.http import HttpResponse, HttpResponseRedirect
 
 class Container(View):
 
@@ -25,12 +26,12 @@ class Container(View):
         for erp in erps_to_json(erps):
             data = get_container_data('erp_'+str(erp['id']))
             response_json['erps'].append({
+                'id' : erp['id'],
                 'company' : erp['company'],
                 'address' : erp['address'],
                 'link' : erp['link'],
-                'data' : data
-                # 'state' : data['State'],
-                # 'status' : data['Status']
+                'state' : data[0]['State'],
+                'status' : data[0]['Status'],
             })
         return JsonResponse(response_json)
 
@@ -51,21 +52,22 @@ def create(request):
 
 @login_required
 def stop(request, id):
-    print(id)
-    return JsonResponse({'status':True})
+    erp = ERP.objects.get(id = id)
+    erp.stop_container()
+    return HttpResponseRedirect('/api/v1/erp/view/list')
 
 @login_required
 def start(request, id):
-    print(id)
-    return JsonResponse({'status':True})
+    erp = ERP.objects.get(id = id)
+    erp.start_container()
+    return HttpResponseRedirect('/api/v1/erp/view/list')
 
 @login_required
 def delete(request, id):
-    print(id)
-    return JsonResponse({'status':True})
-
-
-
+    erp = ERP.objects.get(id = id)
+    erp.delete_container()
+    erp.delete()
+    return HttpResponseRedirect('/api/v1/erp/view/list')
 
 @login_required
 def dashboard(request):
