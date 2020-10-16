@@ -5,19 +5,19 @@ import uuid
 import requests
 from erp_handler.settings import docker_ip, docker_port, docker_protocol
 
-def get_container_data(container_name):
+def get_container_data(name):
     url = '{}://{}:{}/containers/json'.format(docker_protocol, docker_ip, docker_port)
-    params = 'filters={"name":["{}"]}'.format(container_name)
+    params = 'filters={"name":["'+str(name)+'"]}'
     res = requests.get(url, params=params)
     return res.json()
-
-def container_creation(uuid):
+    
+def container_creation(id):
     try:
         erp_image = 'erp_web_base'
         db_image = 'erp_db_base'
-        network_name = "erp_net_"+str(uuid)
-        db_name = "db_"+str(uuid)
-        erp_name = "erp_"+str(uuid)
+        network_name = "erp_net_"+str(id)
+        db_name = "db_"+str(id)
+        erp_name = "erp_"+str(id)
         cmd = 'docker network create --attachable {}'.format(network_name)
         os.system(cmd)
         cmd = 'docker run --name {0} --label {0} --network {1} --network-alias=db --hostname db -d {2}'.format(
@@ -50,17 +50,17 @@ class ERP(models.Model):
         return f'{self.company} {self.user}'
 
     def create_container(self):
-        x = container_creation(self.uuid)
+        id = self.id
+        x = container_creation(id)
         if x:
             raise Exception(str(x))
-        name = 'erp_'+str(self.uuid)
-        network_name = 'erp_net_'+str(self.uuid)
-        container = get_container_data(name)[0]
+        network_name = 'erp_net_'+str(id)
+        container = get_container_data('erp_'+str(id))[0]
         self.container_id = container['Id'] 
         self.ip = container['NetworkSettings']['Networks'][network_name]['IPAddress']
         self.link =  container['NetworkSettings']['Networks'][network_name]['IPAddress']
         self.network_id = container['NetworkSettings']['Networks'][network_name]['NetworkID']
-        self.db_container_id = get_container_data('db_'+str(uuid))[0]['Id']
+        self.db_container_id = get_container_data('db_'+str(id))[0]['Id']
         self.save()
     
     def stop_container(self):
