@@ -113,10 +113,10 @@ class ERP(models.Model):
             return False
     
     def start_container(self):
-        url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.container_id)
-        requests.post(url)
         url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
         requests.post(url)
+        url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.container_id)
+        requests.post(url)s
         id = self.id
         erp_name = "erp_"+str(id)
         cmd = 'docker exec {} /bin/bash service nginx start'.format(erp_name)
