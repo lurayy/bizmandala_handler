@@ -45,8 +45,20 @@ def create(request):
             company = data_json['company'],
             address = data_json['address']
         )
+        # try:?
         erp.create_container()
+        print('asdfasdf')
+        # except:
+        #     try:
+        #         erp.stop_container()
+        #         erp.delete_container()
+        #         print('delete container')
+        #         erp.delete()
+        #     except:
+        #         print('deltet erp')
+        #         erp.delete()
         return JsonResponse({'status':True}, status = 200)
+
     else:
         return JsonResponse( {'status':False}, status=502)
 

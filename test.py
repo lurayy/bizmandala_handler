@@ -1,52 +1,30 @@
-import os 
+upstream channels-backend {
+    server {};
+}
 
-erp_image = 'erp_web_base'
-db_image = 'erp_db_base'
+server {
+    listen 80;
+    server_name 0.0.0.0;
+    charset utf-8;
 
-network_name = "erp_net_3"
-db_name = "db_3"
-erp_name = "erp_3"
-
-cmd = 'docker network create --attachable {}'.format(network_name)
-x = os.system(cmd)
-print("id = ",x)
-cmd = 'docker run --name {0} --label {0} --network {1} --network-alias=db --hostname db -d {2}'.format(db_name, network_name, db_image)
-x = os.system(cmd)
-print("id = ",x)
-
-cmd = 'docker run -d --name {0} --label {0} --network {1} --hostname {2} --link {3} {2}'.format(erp_name, network_name, erp_image, db_name)
-x = os.system(cmd)
-print("id = ",x)
-cmd = 'docker exec {} /bin/bash -c "/usr/src/app/seeder.sh"'.format(erp_name)
-x = os.system(cmd)
-print("id = ",x)
-# import requests
+    client_max_body_size 128M;
 
 
-# url = "{}://{}:{}/containers/json".format('http','127.0.0.1', '2375', ) 
-# print(url)
-# params = 'filters={"name":["db_3"]}'
-# res = requests.get(url, params=params)
-# get containers from returned json
-# containers = res.json()
-# print(containers)
-# print(containers)
-# instantiate empty list of containers
-# container = containers[0]
-# iterate container list to grab only needed fields
-# to keep payload small
-# print(container['Id'][:12])
-# url = "{}://{}:{}/containers/{}".format('http','127.0.0.1', '2375', '3523d6219e7d')
-# res = requests.delete(url)
-# print(res.text)
+    location / {
+        proxy_pass http://channels-backend;
+    }
 
-#     # append 
-#     containers_list.append(
-#         {
-#             'id': container['Id'],
-#             'name': container['Names'][0],
-#             'state': container['State'],
-#             'status': container['Status'],
-#         }
-#     )
-# print(containers_list)
+    location /ws {
+        proxy_pass http://channels-backend;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
+    }
+}

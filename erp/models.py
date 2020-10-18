@@ -4,6 +4,36 @@ import os
 import uuid
 import requests
 from erp_handler.settings import docker_ip, docker_port, docker_protocol
+from os import path
+import json
+
+
+
+
+class PortMan(models.Model):
+    server_name = models.CharField(max_length=255, default = "0.0.0.0")
+    current_port = models.PositiveIntegerField(default='9000')
+
+    available_ports = models.TextField(default='[]')
+
+    def get_port(self):
+        ports = json.loads(self.available_ports)
+        if len(ports) > 0:
+            x = ports.pop(len(ports)-1)
+            self.available_ports = json.dumps(ports)
+            self.save()
+        else:
+            x = self.current_port
+            self.current_port = self.current_port + 1
+            self.save()
+        return x
+    
+    def port_freed(self, port):
+        ports = json.loads(self.available_ports)
+        ports.append(port)
+        self.available_ports = json.dumps(ports)
+        self.save()
+
 
 def get_container_data(name):
     url = '{}://{}:{}/containers/json?all=1'.format(docker_protocol, docker_ip, docker_port)
@@ -44,6 +74,7 @@ class ERP(models.Model):
     network_id = models.TextField(blank=True, null=True)
     link = models.TextField(blank=True, null=True)
     ip = models.CharField(max_length=20, blank=True)
+    port = models.PositiveIntegerField(default=9000, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -58,9 +89,17 @@ class ERP(models.Model):
         container = get_container_data('erp_'+str(id))[0]
         self.container_id = container['Id'] 
         self.ip = container['NetworkSettings']['Networks'][network_name]['IPAddress']
-        self.link =  container['NetworkSettings']['Networks'][network_name]['IPAddress']
         self.network_id = container['NetworkSettings']['Networks'][network_name]['NetworkID']
         self.db_container_id = get_container_data('db_'+str(id))[0]['Id']
+        self.save()
+        try:
+            port_man = PortMan.objects.all()[0]
+        except:
+            raise Exception("Port man is not setup.")
+        port = port_man.get_port()
+        server_name = port_man.server_name
+        self.port = port
+        self.link =  nginx_config(self, server_name, port)
         self.save()
     
     def stop_container(self):
@@ -84,14 +123,17 @@ class ERP(models.Model):
         os.system(cmd)
         network_name = 'erp_net_'+str(id)
         container = get_container_data('erp_'+str(id))[0]
-        print(container)
-        self.container_id = container['Id'] 
-        self.ip = container['NetworkSettings']['Networks'][network_name]['IPAddress']
-        self.link =  container['NetworkSettings']['Networks'][network_name]['IPAddress']
-        self.network_id = container['NetworkSettings']['Networks'][network_name]['NetworkID']
-        self.db_container_id = get_container_data('db_'+str(id))[0]['Id']
-        print("link: ",self.link)
-        self.save()
+        
+        if (self.ip != container['NetworkSettings']['Networks'][network_name]['IPAddress']):
+            print('update nginx')
+            try:
+                port_man = PortMan.objects.all()[0]
+            except:
+                raise Exception("Port man is not setup.")
+            server_name = port_man.server_name
+            self.link =  nginx_config(self, server_name, self.port)
+            self.save()
+            self.save()
         return True
 
     
@@ -103,11 +145,54 @@ class ERP(models.Model):
             requests.delete(url)
             url = '{}://{}:{}/networks/{}'.format(docker_protocol, docker_ip, docker_port, self.network_id)
             requests.delete(url)
+            url = '{}://{}:{}/volumes/prune'.format(docker_protocol, docker_ip, docker_port)
+            requests.post(url)
+            location = '/etc/nginx/sites-enabled/erp_{}'.format(self.id)
+            os.remove(location)
             self.container_id = None
             self.db_container_id = None
             self.network_id = None
             self.link = None
             self.ip = None
+            try:
+                port_man = PortMan.objects.all()[0]
+            except:
+                raise Exception("Port man is not setup.")
+            port_man.port_freed(self.port)
             return True
         except:
             return False
+
+def nginx_config(erp, server_name, port):
+    location = '/etc/nginx/sites-enabled/erp_{}'.format(erp.id)
+    if path.exists(location):
+        os.remove(location)
+    with open(location, 'w') as nginx_config_file:
+        nginx_config_file.writelines([
+            'upstream erp_backend_{} '.format(erp.id),
+            '{',
+            '    server {};'.format(erp.ip),
+            '}',
+            'server {',
+            '    listen {};'.format(port),
+            '    server_name {};'.format(server_name),
+            '    charset utf-8;',
+            '    client_max_body_size 128M;',
+            '    location / {',
+            '        proxy_pass http://erp_backend_{};'.format(erp.id),
+            '    }',
+            '    location /ws {',
+            '        proxy_pass http://erp_backend_{};'.format(erp.id),
+            '        proxy_http_version 1.1;',
+            '        proxy_set_header Upgrade $http_upgrade;',
+            '        proxy_set_header Connection "upgrade";',
+            '        proxy_redirect off;',
+            '        proxy_set_header Host $host;',
+            '        proxy_set_header X-Real-IP $remote_addr;',
+            '        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;',
+            '        proxy_set_header X-Forwarded-Host $server_name;',
+            '    }',
+            '}'
+        ])
+    os.system('nginx -s reload')
+    return f'{server_name}:{port}'
