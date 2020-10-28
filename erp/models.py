@@ -7,13 +7,9 @@ from erp_handler.settings import docker_ip, docker_port, docker_protocol
 from os import path
 import json
 
-
-
-
 class PortMan(models.Model):
     server_name = models.CharField(max_length=255, default = "0.0.0.0")
     current_port = models.PositiveIntegerField(default='9000')
-
     available_ports = models.TextField(default='[]')
 
     def get_port(self):
