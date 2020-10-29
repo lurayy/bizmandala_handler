@@ -1,48 +1,53 @@
-from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseRedirect
+import json 
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from .forms import UserForm, LoginForm
-from .models import UserBase
+from django.views import View
 
 
-def user_login(request):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect('/dashboard')
-    if request.method == "GET":
-        form = LoginForm()
-        return render(request, 'login.html', {'form':form})
-    else:
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username = username, password = password)
-            if user is not None:
-                login(request,user)
-                return HttpResponseRedirect('/dashboard')
+class UserBaseView(View):
+
+    def get(self,request):
+        try:
+            return JsonResponse({'status':True, 'user_info' : self.get_user_details(request.user)})
+        except Exception as exp:       
+            return JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'})
+
+    def post(self,request):
+        try:
+            if request.user != None:
+                json_str = request.body.decode(encoding='UTF-8')
+                data_json = json.loads(json_str)
+                user = authenticate(username = str(data_json['username']), password = str(data_json['password']))
+                login(request, user)
+                return JsonResponse({'status':True, 'user_info' : self.get_user_details(user)})
             else:
-                return HttpResponse("Username or password doesn't match")
-        return HttpResponse("Invalid Form.")
-
-def user_register(request):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect('/dashboard')
-    if request.method == "GET":
-        form = UserForm()
-        return render(request, 'register_user.html', {'form':form})
-    else:
-        form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return HttpResponseRedirect('/dashboard')
-        return HttpResponseRedirect('/user/register')
-
-@login_required
-def user_logout(request):
-    logout(request)
-    return HttpResponseRedirect('/')
+                return JsonResponse({'status':True, 'user_info' : self.get_user_details(request.user)})
+        except Exception as exp:       
+            return JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'})
+    
+    def get_user_details(self, user):
+        data = {
+            'username' : user.username,
+            'email' : user.email
+        }
+        return data
+    
+    def put(self, request):
+        print('this is put')
+        return JsonResponse({'status': True})
+    
+    
+    def delete(self, request):
+        print('this is put')
+        return JsonResponse({'status': True})
+    
+    
+    def options(self, request):
+        print('this is put')
+        return JsonResponse({'status': True})
+    
+    
+    def patch(self, request):
+        print('this is put')
+        return JsonResponse({'status': True})

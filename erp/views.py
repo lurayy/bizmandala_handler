@@ -92,4 +92,3 @@ def list_erps(request):
 @login_required
 def register_erp(request):
     return render(request, 'register.html')
-
