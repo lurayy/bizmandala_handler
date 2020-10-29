@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import UserForm, LoginForm
 from .models import UserBase
 
+
 def user_login(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect('/dashboard')
