@@ -6,7 +6,7 @@ from django.views import View
 from django.utils.decorators import method_decorator
 from django.middleware.csrf import get_token
 from django.shortcuts import render
-
+from user_handler.models import Profile
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 def try_catch_dec():
@@ -41,10 +41,23 @@ class UserBaseView(View):
             return JsonResponse({'status':True, 'user_info' : self.get_user_details(request.user)})
     
     def get_user_details(self, user):
-        data = {
-            'username' : user.username,
-            'email' : user.email
-        }
+        if user != None:
+            data = {
+                'username' : user.username,
+                'email' : user.email,
+                'address' : user.profile.address,
+                'phone_number' : user.profile.phone_number,
+                'phone_number2' : user.profile.phone_number2,
+                'profile_image' : str(user.profile.profile_image),
+                'post' : user.profile.post,
+                'is_verified' : user.is_verified,
+                'first_name' : user.first_name,
+                'last_name' : user.last_name
+            }
+        else:
+            data = {
+                'user' : 'None'
+            }
         return data
     
     @method_decorator(try_catch_dec())
@@ -58,7 +71,6 @@ class UserBaseView(View):
 
     @method_decorator(try_catch_dec())
     def patch(self, request):
-        print('this is put')
         return JsonResponse({'status': True})
 
 
