@@ -6,11 +6,13 @@ class TestClass():
 
     def __init__(self):
         self.session = requests.Session()
+        x = self.session.get(base_url+'user')
         creds = {
             'username' : 'admin',
             'password' : 'pass'
         }
-        x = self.session.post(base_url+'user/', data=json.dumps(creds))
+        print(creds)
+        x = self.session.post(base_url+'user/',headers={'x-csrftoken':self.session.cookies['x-csrftoken']} ,data=json.dumps(creds))
         print('login : ',x.text)
         print('user details : ', self.session.get(base_url+'user/').text)
     
@@ -23,22 +25,8 @@ class TestClass():
         result = self.session.get(base_url+url)
         print(result.text)
 
-        result = self.session.put(base_url+url)
-        print(result.text)
-        
-        result = self.session.delete(base_url+url)
-        print(result.text)
-        
-        result = self.session.options(base_url+url)
-        print(result.text)
-        
-        result = self.session.patch(base_url+url)
-        print(result.text)
-        
-
         return result
 
 if __name__ == "__main__":
     test = TestClass()
-    test.get('user/')
-
+    # test.get('user/')

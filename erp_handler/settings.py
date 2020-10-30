@@ -46,7 +46,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -138,3 +138,47 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 docker_protocol = 'http'
 docker_ip = '127.0.0.1'
 docker_port = 2375
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CSRF_COOKIE_NAME = 'x-csrftoken'
+
+CSRF_TRUSTED_ORIGINS = [
+    'localhost:3000','localhost:8000','*'
+]
+
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'frontend', "build", "static"),  # update the STATICFILES_DIRS
+)
+
+CSRF_COOKIE_USED = True
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'

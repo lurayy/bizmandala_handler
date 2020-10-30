@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from user_handler.views import f404
 urlpatterns = [
     path('super/', admin.site.urls),
     path('api/v1/user/', include('user_handler.urls')),
-    path('api/v1/erps/', include('erp.urls'))
+    path('api/v1/erps/', include('erp.urls')),
+    path('',f404)
 ]

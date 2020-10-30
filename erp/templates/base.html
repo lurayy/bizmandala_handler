@@ -10,20 +10,7 @@
 </head>
 <body>
     <div class="container">
-    {{ user.username }} {{ user.first_name }} {{  user.last_name }}<br> <a href="/user/logout" > <button type="button" value="Logout" class="btn btn-danger" >Logout</button> </a>
-    <hr>
-    <h2>ERP Manager</h2>
-<table>
-    <tr>
-        <td>
-            <a href="/api/v1/erp/view/new"><button type="button" class="btn btn-success">Create ERP for new company</button></a>
-        </td>
-        <td>
-            <a href="/api/v1/erp/view/list"><button type="button" class="btn btn-success" >List Registered ERPs</button></a>
-        </td>
-    </tr>
-</table>
-
+  
   {% block content %}
   
   {% endblock %}
