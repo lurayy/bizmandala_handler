@@ -1,12 +1,10 @@
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
-from django.contrib.auth.decorators import login_required
 from django.views import View
 from django.utils.decorators import method_decorator
 from commerce.models import Bundle, Price, Invoice
 import json
 from commerce.utils import for_everyone, for_mods_only, bundles_to_json, prices_to_json, converter
-
 
 class BundleClassView(View):
     @method_decorator(for_everyone())

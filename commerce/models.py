@@ -33,6 +33,8 @@ class Invoice(models.Model):
     discount_amount = models.FloatField(default=0)
     discount_note = models.TextField()
     
+    payment_verification = models.TextField()
+    
     time_in_days = models.PositiveIntegerField()
     number_of_erp = models.PositiveIntegerField()
     is_bundle = models.BooleanField(default=False)
