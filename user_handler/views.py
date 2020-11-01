@@ -12,7 +12,6 @@ from django.core.files.base import ContentFile
 import base64
 from django.contrib.auth.decorators import login_required
 
-
 def try_catch_dec():
     def decorator(func):
         @ensure_csrf_cookie

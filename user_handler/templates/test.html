@@ -10,7 +10,10 @@
 </div>
 
 <button class="btn btn-success" onclick="login()" >Login</button>
-<button class="btn btn-danger" onclick="test()" >Test</button>
+<button class="btn btn-danger" onclick="test()" >Create</button>
+
+<input id = 'del'>
+<button class="btn btn-danger" onclick="del_f()" >Delete</button>
 
 <script>
       
@@ -66,20 +69,14 @@ function login(){
 
 function test(){
     var creds = {
-    'first_name' : 'asdfasdf',
-    'last_name' :'23f2f',
-    'profile' : {
-        'address' : 'asdfasdf',
-        'phone_number' :null,
-        'phone_number2' : null,
-        'post' :null,
-        'profile_image' : 'None',
+        'time_in_days' : 8,
+        'number_in_erp' : 3,
+        'price' : 25
     }
-}
         $.ajax ({
-            url:'/api/v1/user/',
+            url:'/api/v1/buy/bundles',
             data : JSON.stringify(creds),
-            type: 'PATCH',
+            type: 'POST',
             beforeSend: function(xhr) {
                 xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
             },
@@ -90,7 +87,23 @@ function test(){
                 console.log(data)
             }
         });
+}
 
+
+function del_f(){
+        $.ajax ({
+            url:'/api/v1/buy/bundles/'+$('#del').val(),
+            type: 'DELETE',
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
+            },
+            success: function(data){
+                console.log(data)
+            },
+            error: function(data){
+                console.log(data)
+            }
+        });
 }
 
 </script>
