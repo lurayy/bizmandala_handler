@@ -1,6 +1,6 @@
-from commerce.serializers import BundleSerializer, PriceSerializer, InvoiceSerializer
+from commerce.serializers import SettingSerializer, InvoiceSerializer, CreditSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie
-from commerce.models import Bundle, Price, Invoice
+from commerce.models import Setting, Invoice
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
@@ -48,15 +48,6 @@ def for_logged_in():
         return wrapper
     return decorator
 
-
-
-def bundles_to_json(bundles):
-    data = []
-    for bundle in bundles:
-        temp = BundleSerializer(bundle).data
-        data.append(temp)
-    return data
-
 def converter(value):
     try:
         return(abs(float(value)))
@@ -64,10 +55,10 @@ def converter(value):
         return None
 
 
-def prices_to_json(prices):
+def settings_to_json(settings):
     data = []
-    for price in prices:
-        temp  = PriceSerializer(price).data
+    for setting in settings:
+        temp  = SettingSerializer(setting).data
         data.append(temp)
     return data
 
@@ -75,5 +66,16 @@ def invoices_to_json(invoices):
     data = []
     for invoice in invoices:
         temp = InvoiceSerializer(invoice).data
-        data.append(invoice)
+        data.append(temp)
+    return data
+
+def credits_to_json(credits):
+    data = []
+    for credit in credits:
+        temp = CreditSerializer(credit).data
+        try:
+            temp['erp_company'] = credit.erp.company
+        except:
+            pass
+        data.append(temp)
     return data

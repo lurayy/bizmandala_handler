@@ -1,6 +1,6 @@
 from django.contrib import admin
-from commerce.models import Price, Bundle, Invoice
+from commerce.models import Setting, Invoice, Credit
 
-admin.site.register(Price)
-admin.site.register(Bundle)
+admin.site.register(Setting)
 admin.site.register(Invoice)
+admin.site.register(Credit)

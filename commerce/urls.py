@@ -1,10 +1,8 @@
 from django.urls import path
 from . import views
-
+from . import transactions
 urlpatterns = [
-    path('bundles',views.BundleClassView.as_view()),
-    path('bundles/<str:uuid>',views.BundleClassView.as_view()),
-    path('prices',views.PriceView.as_view()),
-    path('prices/<str:uuid>',views.PriceView.as_view()),
-    # path('invoices')
+    path('settings',views.SettingView.as_view()),
+    path('', transactions.InvoiceView.as_view()),
+    path('<str:uuid>', transactions.InvoiceView.as_view()),
 ]

@@ -2,12 +2,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1 class="jumbotron">
-        Test
-    </h1>
 
-</div>
 
 <button class="btn btn-success" onclick="login()" >Login</button>
 <button class="btn btn-danger" onclick="test()" >Create</button>
@@ -69,12 +64,19 @@ function login(){
 
 function test(){
     var creds = {
-        'time_in_days' : 8,
-        'number_in_erp' : 3,
-        'price' : 25
+        'bill_amount' : 90,
+        'paid_amount' : 90,
+        'discount_amount' : 10,
+        'pure_total_amount' : 100,
+        'is_bundle' :false,
+        'number_of_erps' : 10,
+        'time_in_days' : 10,
+        'top_up_erps' : false,
+        'discount_note' : '',
+        'payment_verification' : ''
     }
         $.ajax ({
-            url:'/api/v1/buy/bundles',
+            url:'/api/v1/purchase/',
             data : JSON.stringify(creds),
             type: 'POST',
             beforeSend: function(xhr) {
@@ -107,5 +109,6 @@ function del_f(){
 }
 
 </script>
+
 
 {% endblock %}
