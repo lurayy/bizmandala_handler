@@ -1,94 +1,114 @@
 from django.views import View
 from django.http import JsonResponse
 import json
-from django.contrib.auth.decorators import login_required, user_passes_test
 from erp.models import ERP, get_container_data
+from commerce.models import Credit
 from erp_handler.settings import docker_ip, docker_port, docker_protocol
 import requests
-from django.shortcuts import render
 from erp.utils import erps_to_json
-from django.http import HttpResponse, HttpResponseRedirect
+from django.utils.decorators import method_decorator
+from commerce.utils import for_everyone, for_mods_only, invoices_to_json, for_logged_in, credits_to_json, converter
 
-class Container(View):
 
-    def get(self, request):
-        try:
-            st = int(request.GET['st'])
-        except:
-            st = 0
-        try: 
-            lmt = int(request.GET['lmt'])
-        except:
-            lmt = 10
-        erps = ERP.objects.filter(user__id = request.user.id)
-        erps = erps[st:st+lmt]
-        response_json = {'status':False, 'erps':[]}
-        for erp in erps_to_json(erps):
-            data = get_container_data('erp_'+str(erp['id']))
-            response_json['erps'].append({
-                'id' : erp['id'],
-                'company' : erp['company'],
-                'address' : erp['address'],
-                'link' : erp['link'],
-                'state' : data[0]['State'],
-                'status' : data[0]['Status'],
-            })
-        return JsonResponse(response_json)
+class ERPView(View):
+    @method_decorator(for_logged_in())
+    def get(self, request, uuid=None):
+        if uuid:
+            erp = ERP.objects.get(uuid = uuid, user=request.user)
+            response_json = {
+                'status' : True,
+                'erp' : erps_to_json([erp])[0]
+            }
+            return JsonResponse(response_json)
+        else:
+            start = converter(request.GET.get('start',''))
+            limit = converter(request.GET.get('lmt',''))
+            company = (request.GET.get('company',''))
+            address = (request.GET.get('address',''))
+            if start==None:
+                start = 0
+            if limit == None:
+                limit = 20
+            erps = ERP.objects.filter(user = request.user)
+            if company:
+                erps = erps.filter(company__icontains = company)
+            if address:
+                address = erps.filter(address__icontains = address)
+            response_json = {
+                'status' : True,
+                'erps' : erps_to_json(erp)
+            }
+            return JsonResponse(response_json)
 
-@login_required
-def create(request):
-    if request.method == "POST":
+    @method_decorator(for_logged_in())
+    def post(self, request):
         json_str = request.body.decode(encoding='UTF-8')
         data_json = json.loads(json_str)
+        credit = Credit.objects.get(uuid = data_json['credit'], user=request.user)
+        if credit.erp:
+            raise Exception('Selected slow is already occupied by ERP of ',credit.erp.company)
+        if credit.left_days == 0:
+            raise Exception('Selected Slot has zero days left.')
         erp = ERP.objects.create(
             user = request.user,
             company = data_json['company'],
-            address = data_json['address']
+            address = data_json['address'],
+            credit = credit
         )
-        # try:?
         erp.create_container()
-        print('asdfasdf')
-        # except:
-        #     try:
-        #         erp.stop_container()
-        #         erp.delete_container()
-        #         print('delete container')
-        #         erp.delete()
-        #     except:
-        #         print('deltet erp')
-        #         erp.delete()
-        return JsonResponse({'status':True}, status = 200)
+        response_json = {
+            'status' : True,
+            'erp' : erps_to_json([erp])[0]
+        }
+        return JsonResponse(response_json)
 
-    else:
-        return JsonResponse( {'status':False}, status=502)
+    @method_decorator(for_logged_in())
+    def delete(self, request, uuid):
+        if uuid:
+            erp = ERP.objects.get(uuid = uuid, user = request.user)
+            erp.stop_container()
+            erp.delete_container()
+            erp.delete()
+            response_json = {
+                'status' : True,
+            }
+            return JsonResponse(response_json)
+        else:
+            raise Exception('UUID required.')
 
-@login_required
-def stop(request, id):
-    erp = ERP.objects.get(id = id)
+    @method_decorator(for_logged_in())
+    def patch(self, request, uuid):
+        if uuid:
+            erp = ERP.objects.get(uuid = uuid, user = request.user)
+            json_str = request.body.decode(encoding='UTF-8')
+            data_json = json.loads(json_str)
+            if data_json['address']: 
+                erp.address = data_json['address']
+            if data_json['company']:
+                erp.company = data_json['company']
+            erp.save()
+            response_json = {
+                'status' : True,
+                'erp' : erps_to_json([erp])[0]
+            }
+            return JsonResponse(response_json)
+        else:
+            raise Exception('UUID required.')
+
+@method_decorator(for_logged_in())
+def stop_container(request, uuid):
+    erp = ERP.objects.get(uuid = uuid, user = request.user)
     erp.stop_container()
-    return HttpResponseRedirect('/api/v1/erp/view/list')
+    response_json = {
+        'status' : True
+    }
+    return JsonResponse(response_json)
 
-@login_required
-def start(request, id):
-    erp = ERP.objects.get(id = id)
+@method_decorator(for_logged_in())
+def start_container(request, uuid):
+    erp = ERP.objects.get(uuid = uuid, user = request.user)
     erp.start_container()
-    return HttpResponseRedirect('/api/v1/erp/view/list')
-
-@login_required
-def delete(request, id):
-    erp = ERP.objects.get(id = id)
-    erp.delete_container()
-    erp.delete()
-    return HttpResponseRedirect('/api/v1/erp/view/list')
-
-@login_required
-def dashboard(request):
-    return render(request, 'dashboard.html')
-
-@login_required
-def list_erps(request):
-    return render(request, 'list.html')
-
-@login_required
-def register_erp(request):
-    return render(request, 'register.html')
+    response_json = {
+        'status' : True
+    }
+    return JsonResponse(response_json)

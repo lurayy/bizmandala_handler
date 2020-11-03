@@ -1,6 +1,5 @@
 from django.db import models
 from user_handler.models import UserBase
-from erp.models import ERP
 import uuid
 
 class Invoice(models.Model):
@@ -31,7 +30,6 @@ class Invoice(models.Model):
 
 class Credit(models.Model):
     user = models.ForeignKey(UserBase, on_delete=models.PROTECT)
-    erp = models.ForeignKey(ERP, on_delete=models.SET_NULL, null=True, blank=True)
     left_days = models.PositiveIntegerField()
     used_days = models.PositiveIntegerField()
 

@@ -1,4 +1,4 @@
-from commerce.utils import for_everyone, for_mods_only, invoices_to_json, for_logged_in, credits_to_json
+from commerce.utils import for_everyone, for_mods_only, invoices_to_json, for_logged_in, credits_to_json, converter
 from django.utils.decorators import method_decorator
 from django.views import View
 from commerce.models import Setting, Invoice, Credit
@@ -17,15 +17,12 @@ class InvoiceView(View):
             return JsonResponse(response_json)
         else:
             return JsonResponse({'asdf' : 'asfd'})
-    
+
     @method_decorator(for_logged_in())
     def post(self, request, uuid=None):
-        
-        print(request.user.username)
         json_str = request.body.decode(encoding='UTF-8')
         data_json = json.loads(json_str)
         settings = Setting.objects.all()[0]
-        print((data_json['number_of_erps']*settings.unitary_price*data_json['time_in_days']))
         if data_json['pure_total_amount'] != (data_json['number_of_erps']*settings.unitary_price*data_json['time_in_days']):
             raise Exception('Pure total amount miscalculated.')
         if data_json['paid_amount'] != data_json['bill_amount']:
@@ -46,14 +43,14 @@ class InvoiceView(View):
         invoice.save()
         credits_ = []
         try:
-            if data_json['top_up_erps']:
-                for erp_id in data_json['top_up_erps']:
-                    credit = Credit.objects.get(user = request.user, erp = erp_id)
+            if data_json['extend_credit']:
+                for credit_id in data_json['extend_credit']:
+                    credit = Credit.objects.get(id = credit_id )
                     credit.left_days = credit.left_days+data_json['time_in_days']
                     credit.save()
                     credits_.append(credit)
             try:
-                top_len = len(data_json['top_up_erps'])
+                top_len = len(data_json['extend_credit'])
             except:
                 top_len = 0
             x = data_json['number_of_erps'] - top_len
@@ -81,7 +78,7 @@ class InvoiceView(View):
                     x.left_days = x.left_days - data_json['time_in_days']
                     x.save()
             raise Exception(exp)
-        
+
     @method_decorator(for_logged_in())
     def patch(self, request, uuid=None):
         if uuid == None:
@@ -95,3 +92,29 @@ class InvoiceView(View):
             'msg' : 'Payment refunded.'
         }
         return JsonResponse(response_json)
+
+
+class CreditView(View):
+    @method_decorator(for_logged_in())
+    def get(self, request, uuid=None):
+        if uuid:
+            credit = Credit.objects.get(uuid = uuid, user=request.user)
+            response_json = {
+                'status' :True,
+                'credit' : credits_to_json([credit])[0]
+            }
+            return JsonResponse(response_json)
+        else:
+            start = converter(request.GET.get('start',''))
+            limit = converter(request.GET.get('lmt',''))
+            if start == None:
+                start = 0
+            if limit == None:
+                limit = 20
+            credit_s = Credit.objects.filter()[start:start+limit]
+            response_json = {
+                'status' : True,
+                'credits' : credits_to_json(credit_s)
+            }
+            return JsonResponse(response_json)
+

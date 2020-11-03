@@ -6,6 +6,7 @@ import requests
 from erp_handler.settings import docker_ip, docker_port, docker_protocol
 from os import path
 import json
+from commerce.models import Credit
 
 class PortMan(models.Model):
     server_name = models.CharField(max_length=255, default = "0.0.0.0")
@@ -61,9 +62,11 @@ def container_creation(id):
 
 class ERP(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
+    
     user = models.ForeignKey(UserBase, on_delete=models.CASCADE)
     company = models.CharField(max_length=255)
     address = models.TextField(max_length=255)
+    credit = models.ForeignKey(Credit, on_delete=models.PROTECT)
 
     container_id = models.TextField(blank=True, null=True)
     db_container_id = models.TextField(blank=True, null=True)

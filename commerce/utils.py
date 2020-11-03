@@ -74,6 +74,7 @@ def credits_to_json(credits):
     for credit in credits:
         temp = CreditSerializer(credit).data
         try:
+            temp['erp'] = credit.erp.uuid
             temp['erp_company'] = credit.erp.company
         except:
             pass
