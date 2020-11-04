@@ -5,21 +5,199 @@
 
 
 <button class="btn btn-success" onclick="login()" >Login</button>
-<button class="btn btn-danger" onclick="test()" >Create</button>
-
-<input id = 'del'>
-<button class="btn btn-danger" onclick="del_f()" >Delete</button>
 
 <br>
+<label>Days</label>
+<input id='days'>
+
+<label>ERP</label>
+<input id='slots'>
+
+<button class="btn btn-success" onclick="buy_slots()">Buy</button>
+
 <br>
 <hr>
-<div id='credits'>
-
+<div id='slots-main'>
+<table id='credit-data' width=100%>
+    <tr>
+        <th>credit id</th>
+        <th>Opened At</th>
+        <th>Days Left</th>
+        <th>Days Used</th>
+        <th>ERP</th>
+    </tr>
+   
+</table>
 </div>
 
 
-<script>
-      
+<br>
+<div class="container" >
+<h3>Registered ERP</h3>
+<br>
+<table id='table_erp_list' style="width:100%" border-collapse="collapse" > 
+    <thead>
+        <th scope="col" >
+            Company
+        </th>
+        <th scope="col">
+            Address
+        </th>
+        <th scope="col">
+            State
+        </th>
+
+        <th scope="col">
+            Status
+        </th>
+        <th scope="col">
+            Credits Left
+        </th>
+
+        <th scope="col">
+            Action
+        </th>
+    </thead>
+
+</table>
+</div>
+
+<div class="container" >
+    <h3>Add New ERP</h3>
+    <br>
+    
+    <table width='50%' id='main-table'>
+        <tr>
+            <td>
+                Company
+            </td>
+            <td>
+                <input id='company' type="text">
+            </td>
+        </tr>
+    
+        <tr>
+            <td>
+                Address
+            </td>
+            <td>
+                <input id='address' type="text">
+            </td>
+        </tr>
+
+        <tr>
+            <td>
+                Credit Id
+            </td>
+            <td>
+                <input id='slot-id' type="number">
+            </td>
+        </tr>
+        <tr>
+            <td> </td>
+        </tr>
+        <tr>
+            <td colspan="2" >
+                <button type="button" class="btn btn-success" onclick="create_container()">Create</button>
+            </td>
+        </tr>
+    </table>
+    <br>
+    <br>
+    
+    <h3 id='loading-logo'  >Creating and seeding please wait . . . </h3>
+    <h3 id='error'>Error occored</h3>
+    </div>
+    <script>
+    $('#loading-logo').hide()
+    $('#error').hide()
+    
+    
+    function create_container(){
+        data = {
+            'company' : $('#company').val(),
+            'address' : $('#address').val(),
+            'credit' : $('#slot-id').val()
+        }
+        console.log(data)
+    
+        $('#main-table').hide()
+        $('#loading-logo').show()
+        $.ajax ({
+            type: 'POST',
+            url: '/api/v1/erps/',
+            data: JSON.stringify(data),
+            success: function(data){
+                if (data['status']){
+                    $('#loading-logo').hide()
+                    $('#main-table').show()
+                    location.reload()
+                }
+                else{
+                    console.log(data)
+                    $('#main-table').show()
+                    $('#error').show()
+                    $('#loading-logo').hide()
+                }
+        }
+        }); 
+    }
+
+$(document).ready(function(){
+    get_erps()
+}) 
+
+function get_erps(){
+    var xhttp = new XMLHttpRequest();
+    $.ajax ({
+        type: 'GET',
+        url: '/api/v1/erps',
+        success: function(data){
+            console.log('erps : ',data)
+            output(data['erps']);        
+    }
+    });
+}
+function output(data){
+    data.forEach(erp => {
+        var btn
+        if (erp['state'] == "running"){
+            btn = '<a href="/api/v1/erps/'+erp['uuid']+'/stop"><button type="button" class="btn btn-danger">Stop</button></a> <a href="http://'+erp['link']+'"><button type="button" class="btn btn-info">Open ERP</button></a>'
+        }
+        else if (erp['state'] == "created" || erp['state']=="paused" || erp['state']=="exited"){
+            btn = '<a href="/api/v1/erps/'+erp['uuid']+'/start"><button type="button" class="btn btn-success">Start</button></a> <button onclick= delete_erp("'+erp['uuid']+'")  type="button" class="btn btn-danger">Delete</button>'
+        }
+        else if (erp['state'] == "restarting" ){
+            btn = '<a href="/api/v1/erps/'+erp['uuid']+'/start"><button type="button" class="btn btn-secondary">Waiting</button></a>'
+        }
+        $('#table_erp_list').append(
+            '<tr><th scope="col">'+erp["company"]+'</td><td>'+erp["address"]+'</td><td>'+erp["state"]+'</td><td>'+erp["status"]+'</td><td>'+erp['credits']['left_days']+'</td><td>'+btn+'</td></tr>'
+        )
+
+    });
+}
+
+function delete_erp(uuid){
+    $.ajax ({
+        url:'/api/v1/erps/'+uuid,
+        type: 'DELETE',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
+        },
+        success: function(data){
+            console.log(data)
+        },
+        error: function(data){
+            console.log(data)
+        }
+    });
+
+}
+
+
+$( document ).ready(function() {
+    get_credits()
+});
 function getCookie(name) {
     var cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -51,6 +229,52 @@ $.ajaxSetup({
 
 console.log(csrftoken)
 
+var unitary_price = 1000;
+
+
+function get_credits(){
+    $.ajax ({
+        url:'/api/v1/purchase/credits/',
+        type: 'GET',
+        success: function(data){
+            console.log(data['credits'])
+            data['credits'].forEach(element => {
+                $("#credit-data").append('<tr><td>'+ element['id']+'</td><td>'+element['created_at']+'</td><td>'+element['left_days'] +'</td><td>'+element['used_days']+'</td><td>'+element['erp_company']+'</td></tr>')
+            });
+        },
+        error: function(data){
+            console.log(data)
+        }
+    });
+}
+
+function buy_slots(){
+    var total = $('#days').val() * $("#slots").val() * unitary_price
+    console.log(total) 
+    var data = {
+            'pure_total_amount' : total,
+            'bill_amount' : total,
+            'paid_amount' : total,
+            'discount_amount' : 0,
+            'discount_note' : '',
+            'payment_verification' : 'khalti_payment_token_here',
+            'time_in_days':  $('#days').val(),
+            'number_of_erps' : $("#slots").val(),
+            'extend_credit' : null
+        }
+        $.ajax ({
+            url:'/api/v1/purchase/',
+            type: 'POST',
+            data: JSON.stringify(data),
+            success: function(data){
+                console.log(data)
+            },
+            error: function(data){
+                console.log(data)
+            }
+        });
+}
+
 function login(){
     var creds = {
             'username' : 'admin',
@@ -69,7 +293,6 @@ function login(){
         });
 }
 
-
 function test(){
     var creds = {
         'bill_amount' : 90,
@@ -83,37 +306,58 @@ function test(){
         'discount_note' : '',
         'payment_verification' : ''
     }
-        $.ajax ({
-            url:'/api/v1/purchase/',
-            data : JSON.stringify(creds),
-            type: 'POST',
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
-            },
-            success: function(data){
-                console.log(data)
-            },
-            error: function(data){
-                console.log(data)
-            }
-        });
+    $.ajax ({
+        url:'/api/v1/purchase/',
+        data : JSON.stringify(creds),
+        type: 'POST',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
+        },
+        success: function(data){
+            console.log(data)
+        },
+        error: function(data){
+            console.log(data)
+        }
+    });
 }
 
-
 function del_f(){
-        $.ajax ({
-            url:'/api/v1/buy/bundles/'+$('#del').val(),
-            type: 'DELETE',
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
-            },
-            success: function(data){
-                console.log(data)
-            },
-            error: function(data){
-                console.log(data)
-            }
-        });
+    $.ajax ({
+        url:'/api/v1/buy/bundles/'+$('#del').val(),
+        type: 'DELETE',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
+        },
+        success: function(data){
+            console.log(data)
+        },
+        error: function(data){
+            console.log(data)
+        }
+    });
+}
+
+function create_erp(){
+    var creds = {
+        'company' : 'Mandala',
+        'address' : 'Pokhara',
+        'credit' : $("#credit-id-input").val()
+    }
+    $.ajax ({
+        url:'/api/v1/erps/',
+        data : JSON.stringify(creds),
+        type: 'POST',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
+        },
+        success: function(data){
+            console.log(data)
+        },
+        error: function(data){
+            console.log(data)
+        }
+    });
 }
 
 </script>

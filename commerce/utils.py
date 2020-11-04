@@ -11,7 +11,7 @@ def for_everyone():
             try:
                 return func(request, *args, **kwargs)
             except Exception as exp: 
-                res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'}, status=400)
+                res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'})
                 return res
         return wrapper
     return decorator
@@ -28,7 +28,7 @@ def for_mods_only():
                 else:
                     return JsonResponse({'status':False,'error': 'Unauthorized access.'}, status=403)
             except Exception as exp: 
-                res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'}, status=400)
+                res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'})
                 return res
         return wrapper
     return decorator
@@ -43,7 +43,7 @@ def for_logged_in():
                 else:
                     return func(request, *args, **kwargs)
             except Exception as exp: 
-                res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'}, status=400)
+                res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'})
                 return res
         return wrapper
     return decorator
@@ -77,6 +77,7 @@ def credits_to_json(credits):
             temp['erp'] = credit.erp.uuid
             temp['erp_company'] = credit.erp.company
         except:
-            pass
+            temp['erp'] = None
+            temp['erp_company'] = "Not Assigned"
         data.append(temp)
     return data

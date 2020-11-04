@@ -13,7 +13,7 @@ class SettingView(View):
         settings = Setting.objects.all()[0]
         response_json = {
             'status' : True,
-            'setting' : settings_to_json([settings])
+            'setting' : settings_to_json([settings])[0]
         }
         return JsonResponse(response_json)
 

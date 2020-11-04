@@ -23,10 +23,14 @@ class InvoiceView(View):
         json_str = request.body.decode(encoding='UTF-8')
         data_json = json.loads(json_str)
         settings = Setting.objects.all()[0]
+        data_json['time_in_days'] = int(data_json['time_in_days'])
+        data_json['number_of_erps'] = int(data_json['number_of_erps'])
+        print('asf')
         if data_json['pure_total_amount'] != (data_json['number_of_erps']*settings.unitary_price*data_json['time_in_days']):
             raise Exception('Pure total amount miscalculated.')
         if data_json['paid_amount'] != data_json['bill_amount']:
             raise Exception('Billed amount is not equal to the paid amount.')
+        print('asf')
         invoice = Invoice.objects.create(
             user = request.user,
             bill_amount = data_json['bill_amount'],
@@ -37,7 +41,6 @@ class InvoiceView(View):
             payment_verification = data_json['payment_verification'],
             time_in_days = data_json['time_in_days'],
             number_of_erps = data_json['number_of_erps'],
-            is_bundle = data_json['is_bundle']
         )
         invoice.is_paid = True
         invoice.save()

@@ -66,7 +66,7 @@ class ERP(models.Model):
     user = models.ForeignKey(UserBase, on_delete=models.CASCADE)
     company = models.CharField(max_length=255)
     address = models.TextField(max_length=255)
-    credit = models.ForeignKey(Credit, on_delete=models.PROTECT)
+    credit = models.OneToOneField(Credit, on_delete=models.PROTECT, related_name="erp")
 
     container_id = models.TextField(blank=True, null=True)
     db_container_id = models.TextField(blank=True, null=True)
@@ -81,6 +81,7 @@ class ERP(models.Model):
 
     def create_container(self):
         id = self.id
+        x = None
         x = container_creation(id)
         if x:
             raise Exception(str(x))
@@ -100,6 +101,8 @@ class ERP(models.Model):
         self.port = port
         self.link =  nginx_config(self, server_name, port)
         self.save()
+
+
     
     def stop_container(self):
         try:
