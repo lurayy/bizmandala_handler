@@ -18,21 +18,6 @@ class SettingView(View):
         return JsonResponse(response_json)
 
     @method_decorator(for_mods_only())
-    def post(self, request, uuid=None):
-        if uuid:
-            raise Exception('Doesnot take uuid for creation of new price model.')
-        json_str = request.body.decode(encoding='UTF-8')
-        data_json = json.loads(json_str)
-        settings = Setting.objects.create(
-            unitary_price = data_json['unitary_price']
-        )
-        response_json = {
-            'status' : True,
-            'settings' : settings_to_json([settings])[0]
-        }
-        return JsonResponse(response_json)
-
-    @method_decorator(for_mods_only())
     def patch(self, request, uuid=None):
         if not uuid:
             raise Exception('UUID of the price is required for modifcation.')
@@ -47,11 +32,3 @@ class SettingView(View):
             'settings' : settings_to_json([settings])[0]
         }
         return JsonResponse(response_json)
-
-    @method_decorator(for_mods_only())
-    def delete(self, request, uuid):
-        if uuid == None:
-            raise Exception('UUID required.')
-        settings = Setting.objects.get(uuid=uuid)
-        settings.delete()
-        return JsonResponse({'status' : True})

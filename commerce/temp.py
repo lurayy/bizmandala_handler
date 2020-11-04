@@ -10,33 +10,33 @@
 #             }
 #             return JsonResponse(response_json)
 #         else:
-#             start = converter(request.GET.get('start',''))
-#             limit = converter(request.GET.get('lmt',''))
-#             price_gte = converter(request.GET.get('price_gte',''))
-#             price_lte = converter(request.GET.get('price_lte',''))
-#             days_lte = converter(request.GET.get('days_lte',''))
-#             days_gte = converter(request.GET.get('days_gte',''))
-#             erp_gte = converter(request.GET.get('erp_gte',''))
-#             erp_lte = converter(request.GET.get('erp_lte',''))
-#             bundles = Bundle.objects.all()
-#             if price_gte:
-#                 bundles = bundles.filter(price__gte = price_gte)
-#             if price_lte:
-#                 bundles = bundles.filter(price__lte = price_lte)
-#             if days_gte:
-#                 bundles = bundles.filter(time_in_days__gte = days_gte)
-#             if days_lte:
-#                 bundles = bundles.filter(time_in_days__lte = days_lte)
-#             if erp_gte:
-#                 bundles = bundles.filter(number_of_erp__gte = erp_gte)
-#             if erp_lte:
-#                 bundles = bundles.filter(number_of_erp__lte = erp_lte)
-#             if start == None:
-#                 start = 0
-#             if limit == None:
-#                 limit = 20
-#             bundles = bundles[start:start+limit]
-#             return JsonResponse({'status':True, 'bundles': bundles_to_json(bundles)})
+            # start = converter(request.GET.get('start',''))
+            # limit = converter(request.GET.get('lmt',''))
+            # price_gte = converter(request.GET.get('price_gte',''))
+            # price_lte = converter(request.GET.get('price_lte',''))
+            # days_lte = converter(request.GET.get('days_lte',''))
+            # days_gte = converter(request.GET.get('days_gte',''))
+            # erp_gte = converter(request.GET.get('erp_gte',''))
+            # erp_lte = converter(request.GET.get('erp_lte',''))
+            # bundles = Bundle.objects.all()
+            # if price_gte:
+            #     bundles = bundles.filter(price__gte = price_gte)
+            # if price_lte:
+            #     bundles = bundles.filter(price__lte = price_lte)
+            # if days_gte:
+            #     bundles = bundles.filter(time_in_days__gte = days_gte)
+            # if days_lte:
+            #     bundles = bundles.filter(time_in_days__lte = days_lte)
+            # if erp_gte:
+            #     bundles = bundles.filter(number_of_erp__gte = erp_gte)
+            # if erp_lte:
+            #     bundles = bundles.filter(number_of_erp__lte = erp_lte)
+            # if start == None:
+            #     start = 0
+            # if limit == None:
+            #     limit = 20
+            # bundles = bundles[start:start+limit]
+            # return JsonResponse({'status':True, 'bundles': bundles_to_json(bundles)})
 
 #     @method_decorator(for_mods_only())
 #     def post(self,request):

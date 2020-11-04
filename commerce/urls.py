@@ -3,6 +3,7 @@ from . import views
 from . import transactions
 urlpatterns = [
     path('settings',views.SettingView.as_view()),
+    path('settings/<str:uuid>', views.SettingView.as_view()),
     path('', transactions.InvoiceView.as_view()),
     path('<str:uuid>', transactions.InvoiceView.as_view()),
     path('credits/', transactions.CreditView.as_view()),

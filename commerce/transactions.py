@@ -16,7 +16,34 @@ class InvoiceView(View):
             }
             return JsonResponse(response_json)
         else:
-            return JsonResponse({'asdf' : 'asfd'})
+            start = converter(request.GET.get('start',''))
+            limit = converter(request.GET.get('lmt',''))
+            bill_amount_gte = converter(request.GET.get('bill_amount_gte',''))
+            bill_amount_lte = converter(request.GET.get('bill_amount_lte',''))
+            days_lte = converter(request.GET.get('days_lte',''))
+            days_gte = converter(request.GET.get('days_gte',''))
+            erp_gte = converter(request.GET.get('erp_gte',''))
+            erp_lte = converter(request.GET.get('erp_lte',''))
+            invoices = Invoice.objects.filter(user = request.user)
+            if bill_amount_gte:
+                invoices = invoices.filter(bill_amount__gte = bill_amount_gte)
+            if bill_amount_lte:
+                invoices = invoices.filter(bill_amount__lte = bill_amount_lte)
+            if days_gte:
+                invoices = invoices.filter(time_in_days__gte = days_gte)
+            if days_lte:
+                invoices = invoices.filter(time_in_days__lte = days_lte)
+            if erp_gte:
+                invoices = invoices.filter(number_of_erps__gte = erp_gte)
+            if erp_lte:
+                invoices = invoices.filter(number_of_erps__lte = erp_lte)
+            if start == None:
+                start = 0
+            if limit == None:
+                limit = 20
+            invoices = invoices[start:start+limit]
+            return JsonResponse({'status':True, 'invoices': invoices_to_json(invoices)})
+
 
     @method_decorator(for_logged_in())
     def post(self, request, uuid=None):
@@ -25,7 +52,6 @@ class InvoiceView(View):
         settings = Setting.objects.all()[0]
         data_json['time_in_days'] = int(data_json['time_in_days'])
         data_json['number_of_erps'] = int(data_json['number_of_erps'])
-        print('asf')
         if data_json['pure_total_amount'] != (data_json['number_of_erps']*settings.unitary_price*data_json['time_in_days']):
             raise Exception('Pure total amount miscalculated.')
         if data_json['paid_amount'] != data_json['bill_amount']:
