@@ -7,6 +7,7 @@ from erp_handler.settings import docker_ip, docker_port, docker_protocol
 from os import path
 import json
 from commerce.models import Credit
+from django.utils.timezone import now
 
 class PortMan(models.Model):
     server_name = models.CharField(max_length=255, default = "0.0.0.0")
@@ -36,6 +37,7 @@ def get_container_data(name):
     url = '{}://{}:{}/containers/json?all=1'.format(docker_protocol, docker_ip, docker_port)
     params = 'filters={"name":["'+str(name)+'"]}'
     res = requests.get(url, params=params)
+    print(res.json())
     return res.json()
     
 def container_creation(id):
@@ -76,6 +78,9 @@ class ERP(models.Model):
     port = models.PositiveIntegerField(default=9000, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
+    is_running = models.BooleanField(default = False)
+    started_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return f'{self.company} {self.user}'
 
@@ -101,8 +106,9 @@ class ERP(models.Model):
         self.port = port
         self.link =  nginx_config(self, server_name, port)
         self.save()
-
-
+        self.is_running = True
+        self.started_at = now()
+        self.save()
     
     def stop_container(self):
         try:
@@ -110,11 +116,15 @@ class ERP(models.Model):
             requests.post(url)
             url = '{}://{}:{}/containers/{}/stop'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
             requests.post(url)
+            self.is_running = False
+            self.save()
             return True
         except:
             return False
     
     def start_container(self):
+        if self.credit.left_days <=0:
+            raise Exception("No credit left in this slot. Please recharge.")
         url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
         requests.post(url)
         url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.container_id)
@@ -136,6 +146,9 @@ class ERP(models.Model):
             self.link =  nginx_config(self, server_name, self.port)
             self.save()
             self.save()
+        self.is_running = True
+        self.started_at = now()
+        self.save()
         return True
 
     

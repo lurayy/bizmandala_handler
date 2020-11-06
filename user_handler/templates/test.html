@@ -186,6 +186,7 @@ function delete_erp(uuid){
         },
         success: function(data){
             console.log(data)
+            location.reload()
         },
         error: function(data){
             console.log(data)
@@ -267,6 +268,7 @@ function buy_slots(){
             type: 'POST',
             data: JSON.stringify(data),
             success: function(data){
+                location.reload()
                 console.log(data)
             },
             error: function(data){
@@ -285,7 +287,7 @@ function login(){
             type: 'POST',
             data: JSON.stringify(creds),
             success: function(data){
-                console.log(data)
+                location.reload()
             },
             error: function(data){
                 console.log(data)
@@ -314,7 +316,7 @@ function test(){
             xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
         },
         success: function(data){
-            console.log(data)
+            location.reload()
         },
         error: function(data){
             console.log(data)
@@ -353,6 +355,7 @@ function create_erp(){
         },
         success: function(data){
             console.log(data)
+            location.reload()
         },
         error: function(data){
             console.log(data)
