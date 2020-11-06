@@ -44,8 +44,11 @@ class ERPView(View):
         json_str = request.body.decode(encoding='UTF-8')
         data_json = json.loads(json_str)
         credit = Credit.objects.get(id = data_json['credit'], user=request.user)
-        # if credit.erp:
-            # raise Exception('Selected slow is already occupied by ERP of ',str(credit.erp.company))
+        try:
+            if credit.erp:
+                raise Exception('Selected slow is already occupied by ERP of ',str(credit.erp.company))
+        except:
+            pass
         if credit.left_days == 0:
             raise Exception('Selected Slot has zero days left.')
         erp = None
