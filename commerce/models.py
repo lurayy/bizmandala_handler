@@ -31,7 +31,7 @@ class Invoice(models.Model):
 class Credit(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     user = models.ForeignKey(UserBase, on_delete=models.PROTECT)
-    left_days = models.PositiveIntegerField()
+    left_days = models.IntegerField()
     used_days = models.PositiveIntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,6 +40,9 @@ class Credit(models.Model):
 class Setting(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     unitary_price = models.FloatField()
+    grace_period_in_days = models.PositiveIntegerField(default=2)
+    lowest_purchase_time_limit_in_days = models.PositiveIntegerField(default=30)
+
     
 
 '''

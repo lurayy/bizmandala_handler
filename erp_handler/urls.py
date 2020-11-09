@@ -16,7 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from user_handler.views import f404, test
-from erp.task import handle_credits
 
 urlpatterns = [
     path('super/', admin.site.urls),
@@ -26,5 +25,3 @@ urlpatterns = [
     path('',f404),
     path('test',test)
 ]
-
-handle_credits(repeat = 5)

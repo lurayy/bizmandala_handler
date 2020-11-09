@@ -49,14 +49,18 @@ class InvoiceView(View):
     def post(self, request, uuid=None):
         json_str = request.body.decode(encoding='UTF-8')
         data_json = json.loads(json_str)
-        settings = Setting.objects.all()[0]
+        try:
+            settings = Setting.objects.all()[0]
+        except:
+            raise Exception("Setting are not yet set. Please define setting from the admin panel.")
         data_json['time_in_days'] = int(data_json['time_in_days'])
         data_json['number_of_erps'] = int(data_json['number_of_erps'])
+        if data_json['time_in_days'] < settings.lowest_purchase_time_limit_in_days:
+            raise Exception('Purchased time must be at least ',settings.lowest_purchase_time_limit_in_days)
         if data_json['pure_total_amount'] != (data_json['number_of_erps']*settings.unitary_price*data_json['time_in_days']):
             raise Exception('Pure total amount miscalculated.')
         if data_json['paid_amount'] != data_json['bill_amount']:
             raise Exception('Billed amount is not equal to the paid amount.')
-        print('asf')
         invoice = Invoice.objects.create(
             user = request.user,
             bill_amount = data_json['bill_amount'],
