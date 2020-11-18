@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'workers',
+    'django_crontab',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -185,4 +185,6 @@ CSRF_COOKIE_USED = True
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-WORKERS_PURGE = 356
+CRONJOBS = [
+    ('*/1 * * * *', 'erp.cron.handle_credits', '>> /home/lurayy/temp.log')
+]
