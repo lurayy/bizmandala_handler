@@ -1,7 +1,7 @@
 from erp.models import ERP
 from commerce.models import Credit, Setting
-from erp.models import TestModel
 import datetime
+
 def handle_credits():
     try:
         settings = Setting.objects.all()[0]
@@ -15,4 +15,4 @@ def handle_credits():
                 erp.credit.left_days = erp.credit.left_days - 1
                 erp.credit.save()
         except Exception as exp:
-            print(exp, erp.id)
+            print("error ",exp, erp.id)

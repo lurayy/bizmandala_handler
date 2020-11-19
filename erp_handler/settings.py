@@ -186,5 +186,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 CRONJOBS = [
-    ('*/1 * * * *', 'erp.cron.handle_credits', '>> /home/lurayy/temp.log')
+    ('*/1 * * * *', 'erp.cron.handle_credits', '>> {}/logs/tasks.log'.format(BASE_DIR))
 ]

@@ -9,11 +9,6 @@ import json
 from commerce.models import Credit
 from django.utils.timezone import now
 
-
-class TestModel(models.Model):
-    name = models.CharField(max_length=200)
-
-
 class PortMan(models.Model):
     server_name = models.CharField(max_length=255, default = "0.0.0.0")
     current_port = models.PositiveIntegerField(default='9000')

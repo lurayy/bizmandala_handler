@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import ERP, PortMan, TestModel
+from .models import ERP, PortMan
 
 admin.site.register(ERP)
 admin.site.register(PortMan)
-admin.site.register(TestModel)
