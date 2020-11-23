@@ -20,8 +20,8 @@ class InvoiceView(View):
             limit = converter(request.GET.get('lmt',''))
             bill_amount_gte = converter(request.GET.get('bill_amount_gte',''))
             bill_amount_lte = converter(request.GET.get('bill_amount_lte',''))
-            days_lte = converter(request.GET.get('days_lte',''))
-            days_gte = converter(request.GET.get('days_gte',''))
+            hours_lte = converter(request.GET.get('hours_lte',''))
+            hours_gte = converter(request.GET.get('hours_gte',''))
             erp_gte = converter(request.GET.get('erp_gte',''))
             erp_lte = converter(request.GET.get('erp_lte',''))
             invoices = Invoice.objects.filter(user = request.user)
@@ -29,10 +29,10 @@ class InvoiceView(View):
                 invoices = invoices.filter(bill_amount__gte = bill_amount_gte)
             if bill_amount_lte:
                 invoices = invoices.filter(bill_amount__lte = bill_amount_lte)
-            if days_gte:
-                invoices = invoices.filter(time_in_days__gte = days_gte)
-            if days_lte:
-                invoices = invoices.filter(time_in_days__lte = days_lte)
+            if hours_gte:
+                invoices = invoices.filter(hours__gte = hours_gte)
+            if hours_lte:
+                invoices = invoices.filter(hours__lte = hours_lte)
             if erp_gte:
                 invoices = invoices.filter(number_of_erps__gte = erp_gte)
             if erp_lte:
@@ -53,11 +53,11 @@ class InvoiceView(View):
             settings = Setting.objects.all()[0]
         except:
             raise Exception("Setting are not yet set. Please define setting from the admin panel.")
-        data_json['time_in_days'] = int(data_json['time_in_days'])
+        data_json['hours'] = int(data_json['hours'])
         data_json['number_of_erps'] = int(data_json['number_of_erps'])
-        if data_json['time_in_days'] < settings.lowest_purchase_time_limit_in_days:
-            raise Exception('Purchased time must be at least ',settings.lowest_purchase_time_limit_in_days)
-        if data_json['pure_total_amount'] != (data_json['number_of_erps']*settings.unitary_price*data_json['time_in_days']):
+        if data_json['hours'] < settings.lowest_purchase_time_limit_in_hours:
+            raise Exception('Purchased time must be at least ',settings.lowest_purchase_time_limit_in_hours)
+        if data_json['pure_total_amount'] != (data_json['number_of_erps']*settings.unitary_price*data_json['hours']):
             raise Exception('Pure total amount miscalculated.')
         if data_json['paid_amount'] != data_json['bill_amount']:
             raise Exception('Billed amount is not equal to the paid amount.')
@@ -69,7 +69,7 @@ class InvoiceView(View):
             discount_amount = data_json['discount_amount'],
             discount_note = data_json['discount_note'],
             payment_verification = data_json['payment_verification'],
-            time_in_days = data_json['time_in_days'],
+            hours = data_json['hours'],
             number_of_erps = data_json['number_of_erps'],
         )
         invoice.is_paid = True
@@ -79,7 +79,7 @@ class InvoiceView(View):
             if data_json['extend_credit']:
                 for credit_id in data_json['extend_credit']:
                     credit = Credit.objects.get(id = credit_id )
-                    credit.left_days = credit.left_days+data_json['time_in_days']
+                    credit.hours_left = credit.hours_left+data_json['hours']
                     credit.save()
                     credits_.append(credit)
             try:
@@ -91,8 +91,8 @@ class InvoiceView(View):
                 for _ in range (x):
                     credit = Credit.objects.create(
                         user = request.user,
-                        left_days = data_json['time_in_days'],
-                        used_days = 0
+                        hours_left = data_json['hours'],
+                        hours_used = 0
                     )
                     credits_.append(credit)
             response_json = {
@@ -105,10 +105,10 @@ class InvoiceView(View):
             return JsonResponse(response_json)
         except Exception as exp:
             for x in credits_:
-                if x.left_days == data_json['time_in_days']:
+                if x.hours_left == data_json['hours']:
                     x.delete()
                 else:
-                    x.left_days = x.left_days - data_json['time_in_days']
+                    x.hours_left = x.hours_left - data_json['hours']
                     x.save()
             raise Exception(exp)
 

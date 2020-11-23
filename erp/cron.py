@@ -9,10 +9,10 @@ def handle_credits():
         print("Setting are not yet set. Please define setting from the admin panel.")
     for erp in ERP.objects.filter(is_running = True):
         try:
-            if erp.credit.left_days <= -settings.lowest_purchase_time_limit_in_days:
+            if erp.credit.hours_left <= -settings.lowest_purchase_time_limit_in_hours:
                 erp.stop_container()
             else:
-                erp.credit.left_days = erp.credit.left_days - 1
+                erp.credit.hours_left = erp.credit.hours_left - 1
                 erp.credit.save()
         except Exception as exp:
             print("error ",exp, erp.id)

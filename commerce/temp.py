@@ -14,8 +14,8 @@
             # limit = converter(request.GET.get('lmt',''))
             # price_gte = converter(request.GET.get('price_gte',''))
             # price_lte = converter(request.GET.get('price_lte',''))
-            # days_lte = converter(request.GET.get('days_lte',''))
-            # days_gte = converter(request.GET.get('days_gte',''))
+            # hours_lte = converter(request.GET.get('hours_lte',''))
+            # hours_gte = converter(request.GET.get('hours_gte',''))
             # erp_gte = converter(request.GET.get('erp_gte',''))
             # erp_lte = converter(request.GET.get('erp_lte',''))
             # bundles = Bundle.objects.all()
@@ -23,10 +23,10 @@
             #     bundles = bundles.filter(price__gte = price_gte)
             # if price_lte:
             #     bundles = bundles.filter(price__lte = price_lte)
-            # if days_gte:
-            #     bundles = bundles.filter(time_in_days__gte = days_gte)
-            # if days_lte:
-            #     bundles = bundles.filter(time_in_days__lte = days_lte)
+            # if hours_gte:
+            #     bundles = bundles.filter(hours__gte = hours_gte)
+            # if hours_lte:
+            #     bundles = bundles.filter(hours__lte = hours_lte)
             # if erp_gte:
             #     bundles = bundles.filter(number_of_erp__gte = erp_gte)
             # if erp_lte:
@@ -43,7 +43,7 @@
 #         json_str = request.body.decode(encoding='UTF-8')
 #         data_json = json.loads(json_str)
 #         bundle = Bundle.objects.create(
-#             time_in_days = data_json['time_in_days'],
+#             hours = data_json['hours'],
 #             number_of_erp = data_json['number_in_erp'],
 #             price = data_json['price']
 #         )
@@ -60,8 +60,8 @@
 #         bundle = Bundle.objects.get(uuid=uuid)
 #         json_str = request.body.decode(encoding='UTF-8')
 #         data_json = json.loads(json_str)
-#         if data_json['time_in_days']:
-#             bundle.time_in_days = int(data_json['time_in_days'])
+#         if data_json['hours']:
+#             bundle.hours = int(data_json['hours'])
 #         if data_json['number_of_erp']:
 #             bundle.number_of_erp = int(data_json['number_of_erp'])
 #         if data_json['price']:

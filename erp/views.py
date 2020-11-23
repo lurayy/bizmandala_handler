@@ -52,7 +52,7 @@ class ERPView(View):
             pass
         if occupied:
             raise Exception('Selected slow is already occupied by ERP of ',str(credit.erp.company))
-        if credit.left_days == 0:
+        if credit.hours_left == 0:
             raise Exception('Selected Slot has no credit left.')
         erp = None
         erp = ERP.objects.create(

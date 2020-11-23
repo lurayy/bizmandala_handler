@@ -123,7 +123,7 @@ class ERP(models.Model):
             return False
     
     def start_container(self):
-        if self.credit.left_days <=0:
+        if self.credit.hours_left <=0:
             raise Exception("No credit left in this slot. Please recharge.")
         url = '{}://{}:{}/containers/{}/start'.format(docker_protocol, docker_ip, docker_port, self.db_container_id)
         requests.post(url)

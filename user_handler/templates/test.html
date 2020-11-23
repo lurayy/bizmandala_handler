@@ -171,7 +171,7 @@ function output(data){
             btn = '<a href="/api/v1/erps/'+erp['uuid']+'/start"><button type="button" class="btn btn-secondary">Waiting</button></a>'
         }
         $('#table_erp_list').append(
-            '<tr><th scope="col">'+erp["company"]+'</td><td>'+erp["address"]+'</td><td>'+erp["state"]+'</td><td>'+erp["status"]+'</td><td>'+erp['credits']['left_days']+'</td><td>'+btn+'</td></tr>'
+            '<tr><th scope="col">'+erp["company"]+'</td><td>'+erp["address"]+'</td><td>'+erp["state"]+'</td><td>'+erp["status"]+'</td><td>'+erp['credits']['hours_left']+'</td><td>'+btn+'</td></tr>'
         )
 
     });
@@ -240,7 +240,7 @@ function get_credits(){
         success: function(data){
             console.log(data['credits'])
             data['credits'].forEach(element => {
-                $("#credit-data").append('<tr><td>'+ element['id']+'</td><td>'+element['created_at']+'</td><td>'+element['left_days'] +'</td><td>'+element['used_days']+'</td><td>'+element['erp_company']+'</td></tr>')
+                $("#credit-data").append('<tr><td>'+ element['id']+'</td><td>'+element['created_at']+'</td><td>'+element['hours_left'] +'</td><td>'+element['hours_used']+'</td><td>'+element['erp_company']+'</td></tr>')
             });
         },
         error: function(data){
@@ -259,7 +259,7 @@ function buy_slots(){
             'discount_amount' : 0,
             'discount_note' : '',
             'payment_verification' : 'khalti_payment_token_here',
-            'time_in_days':  $('#days').val(),
+            'hours':  $('#days').val(),
             'number_of_erps' : $("#slots").val(),
             'extend_credit' : null
         }
@@ -303,7 +303,7 @@ function test(){
         'pure_total_amount' : 100,
         'is_bundle' :false,
         'number_of_erps' : 10,
-        'time_in_days' : 10,
+        'hours' : 10,
         'top_up_erps' : false,
         'discount_note' : '',
         'payment_verification' : ''

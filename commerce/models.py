@@ -13,7 +13,7 @@ class Invoice(models.Model):
     
     payment_verification = models.TextField()
     
-    time_in_days = models.PositiveIntegerField()
+    hours = models.PositiveIntegerField()
     number_of_erps = models.PositiveIntegerField()
 
     is_refunded = models.BooleanField(default=False)
@@ -31,8 +31,8 @@ class Invoice(models.Model):
 class Credit(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     user = models.ForeignKey(UserBase, on_delete=models.PROTECT)
-    left_days = models.IntegerField()
-    used_days = models.PositiveIntegerField()
+    hours_left = models.IntegerField()
+    hours_used = models.PositiveIntegerField()
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -40,14 +40,14 @@ class Credit(models.Model):
 class Setting(models.Model):
     uuid = models.UUIDField(unique=True, default=uuid.uuid4)
     unitary_price = models.FloatField()
-    grace_period_in_days = models.PositiveIntegerField(default=2)
-    lowest_purchase_time_limit_in_days = models.PositiveIntegerField(default=30)
+    grace_period_in_hours = models.PositiveIntegerField(default=2*24)
+    lowest_purchase_time_limit_in_hours = models.PositiveIntegerField(default=30*24)
 
     
 
 '''
 {
-    time_in_days
+    hours
     number_of_erp
     is_bundle
     
