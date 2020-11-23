@@ -25,7 +25,7 @@ class UserBaseView(View):
     
     @method_decorator(for_everyone())
     def post(self,request):
-        if not request.user.is_authenticated:
+        if not request.user:
             json_str = request.body.decode(encoding='UTF-8')
             data_json = json.loads(json_str)
             user = authenticate(username = str(data_json['username']), password = str(data_json['password']))

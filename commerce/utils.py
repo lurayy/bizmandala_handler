@@ -10,7 +10,8 @@ def for_everyone():
         def wrapper(request, *args, **kwargs):
             try:
                 try:
-                    valid_data = VerifyJSONWebTokenSerializer().validate({'token':token})
+                    data = {'token':request.headers['Authorization'].split(' ')[0]}
+                    valid_data = VerifyJSONWebTokenSerializer().validate(data)
                     user = valid_data['user']
                 except:
                     user = None
@@ -28,13 +29,14 @@ def for_mods_only():
         def wrapper(request, *args, **kwargs):
             try:
                 try:
-                    valid_data = VerifyJSONWebTokenSerializer().validate({'token':token})
+                    data = {'token':request.headers['Authorization'].split(' ')[0]}
+                    valid_data = VerifyJSONWebTokenSerializer().validate(data)
                     user = valid_data['user']
                 except:
                     user = None
                 request.user = user
-                if not request.user.is_authenticated:
-                    return JsonResponse({'status':False,'error': 'Unauthorized access.'}, status=403)
+                if not request.user:
+                    return JsonResponse({'status':False,'error': 'You are not logged in.'}, status=403)
                 if request.user.is_mod:
                     return func(request, *args, **kwargs)
                 else:
@@ -51,12 +53,13 @@ def for_logged_in():
         def wrapper(request, *args, **kwargs):
             try:
                 try:
-                    valid_data = VerifyJSONWebTokenSerializer().validate({'token':token})
+                    data = {'token':request.headers['Authorization'].split(' ')[0]}
+                    valid_data = VerifyJSONWebTokenSerializer().validate(data)
                     user = valid_data['user']
                 except:
                     user = None
                 request.user = user
-                if not request.user.is_authenticated:
+                if not request.user:
                     return JsonResponse({'status':False,'error': 'You are not logged in.'}, status=403)
                 else:
                     return func(request, *args, **kwargs)
