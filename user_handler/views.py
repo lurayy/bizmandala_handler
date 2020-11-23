@@ -10,29 +10,20 @@ from user_handler.models import Profile, UserBase
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.core.files.base import ContentFile
 import base64
-from django.contrib.auth.decorators import login_required
+from commerce.utils import for_logged_in, for_everyone, for_mods_only    
+from rest_framework_jwt.settings import api_settings
+from django.core.mail import send_mail
+from django.conf import settings
 
-def try_catch_dec():
-    def decorator(func):
-        @ensure_csrf_cookie
-        def wrapper(request, *args, **kwargs):
-            try:
-                return func(request, *args, **kwargs)
-            except Exception as exp: 
-                res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'})
-                return res
-        return wrapper
-    return decorator
-    
 
 class UserBaseView(View):
 
-    @method_decorator(try_catch_dec())
+    @method_decorator(for_logged_in())
     def get(self,request):
         res = JsonResponse({'status':True, 'user_info' : self.get_user_details(request.user)})
         return res
     
-    @method_decorator(try_catch_dec())
+    @method_decorator(for_everyone())
     def post(self,request):
         if not request.user.is_authenticated:
             json_str = request.body.decode(encoding='UTF-8')
@@ -40,8 +31,11 @@ class UserBaseView(View):
             user = authenticate(username = str(data_json['username']), password = str(data_json['password']))
             if user == None:
                 return JsonResponse({'status' : False, 'msg': 'Username or password incorrect.'}, status=401)
-            login(request, user)
-            return JsonResponse({'status':True, 'user_info' : self.get_user_details(user)})
+            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+            payload = jwt_payload_handler(user)
+            token = jwt_encode_handler(payload)
+            return JsonResponse({'status':True, 'user_info' : self.get_user_details(user), 'token' : token })
         else:
             return JsonResponse({'status':True, 'user_info' : self.get_user_details(request.user)})
     
@@ -65,7 +59,7 @@ class UserBaseView(View):
             }
         return data
     
-    @method_decorator(try_catch_dec())
+    @method_decorator(for_logged_in())
     def delete(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({'status': False, 'msg':'Not logged in as any user.'}, status='400')
@@ -74,7 +68,7 @@ class UserBaseView(View):
         user.save()
         return JsonResponse({'status': True} )
 
-    @method_decorator(try_catch_dec())
+    @method_decorator(for_logged_in())
     def patch(self, request):
         res = {'status' : False}
         if request.user.is_authenticated:
@@ -111,11 +105,6 @@ class UserBaseView(View):
                 'user' : self.get_user_details(user)
             }            
         return JsonResponse(res)
-
-@login_required
-def user_logout(request):
-    logout(request)
-    return JsonResponse({'status':True})
 
 @require_http_methods(['POST'])
 def register_new_user(request):

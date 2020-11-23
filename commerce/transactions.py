@@ -150,4 +150,3 @@ class CreditView(View):
                 'credits' : credits_to_json(credit_s)
             }
             return JsonResponse(response_json)
-

@@ -2,13 +2,19 @@ from commerce.serializers import SettingSerializer, InvoiceSerializer, CreditSer
 from django.views.decorators.csrf import ensure_csrf_cookie
 from commerce.models import Setting, Invoice
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from rest_framework_jwt.serializers import VerifyJSONWebTokenSerializer
 
 def for_everyone():
     def decorator(func):
         @ensure_csrf_cookie
         def wrapper(request, *args, **kwargs):
             try:
+                try:
+                    valid_data = VerifyJSONWebTokenSerializer().validate({'token':token})
+                    user = valid_data['user']
+                except:
+                    user = None
+                request.user = user
                 return func(request, *args, **kwargs)
             except Exception as exp: 
                 res = JsonResponse({'status':False,'error': f'{exp.__class__.__name__}: {exp}'})
@@ -21,6 +27,12 @@ def for_mods_only():
         @ensure_csrf_cookie
         def wrapper(request, *args, **kwargs):
             try:
+                try:
+                    valid_data = VerifyJSONWebTokenSerializer().validate({'token':token})
+                    user = valid_data['user']
+                except:
+                    user = None
+                request.user = user
                 if not request.user.is_authenticated:
                     return JsonResponse({'status':False,'error': 'Unauthorized access.'}, status=403)
                 if request.user.is_mod:
@@ -38,6 +50,12 @@ def for_logged_in():
         @ensure_csrf_cookie
         def wrapper(request, *args, **kwargs):
             try:
+                try:
+                    valid_data = VerifyJSONWebTokenSerializer().validate({'token':token})
+                    user = valid_data['user']
+                except:
+                    user = None
+                request.user = user
                 if not request.user.is_authenticated:
                     return JsonResponse({'status':False,'error': 'You are not logged in.'}, status=403)
                 else:

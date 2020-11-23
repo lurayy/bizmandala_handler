@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
-
+import datetime
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -45,6 +45,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -124,6 +126,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+TIME_ZONE = 'Asia/Kathmandu'
+
 
 AUTH_USER_MODEL = 'user_handler.UserBase'
 
@@ -155,6 +159,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 
+
 from corsheaders.defaults import default_headers
 
 CORS_ALLOW_HEADERS = [
@@ -175,7 +180,6 @@ CSRF_TRUSTED_ORIGINS = [
     'localhost:3000','localhost:8000','*'
 ]
 
-
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'frontend', "build", "static"),  # update the STATICFILES_DIRS
 )
@@ -188,3 +192,16 @@ MEDIA_URL = '/media/'
 CRONJOBS = [
     ('*/1 * * * *', 'erp.cron.handle_credits', '>> {}/logs/tasks.log'.format(BASE_DIR))
 ]
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=12),
+    'JWT_ALLOW_REFRESH': False,
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(hours=1),
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'JWT_AUTH_COOKIE': None,
+}
+
+EMAIL_HOST = 'smtp.mailtrap.io'
+EMAIL_HOST_USER = 'af0e3f81bcbe90'
+EMAIL_HOST_PASSWORD = '5f482ca89b5e92'
+EMAIL_PORT = '2525'
