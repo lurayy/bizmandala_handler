@@ -145,7 +145,6 @@ class ERP(models.Model):
             server_name = port_man.server_name
             self.link =  nginx_config(self, server_name, self.port)
             self.save()
-            self.save()
         self.is_running = True
         self.started_at = now()
         self.save()
@@ -191,6 +190,7 @@ def nginx_config(erp, server_name, port):
             'server {',
             '    listen {};'.format(port),
             '    server_name {};'.format(server_name),
+            '    include /etc/nginx/mime.types;',
             '    charset utf-8;',
             '    client_max_body_size 128M;',
             '    location / {',

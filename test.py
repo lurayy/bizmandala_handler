@@ -1,8 +1,8 @@
 # import requests
 # from erp_handler.settings import docker_ip, docker_port, docker_protocol
-# # from django.utils.timezone import now
-# # import dateutil.parser
-# # from datetime import datetime, timezone
+# from django.utils.timezone import now
+# import dateutil.parser
+# from datetime import datetime, timezone
 
 # # print(docker_ip)
 
@@ -27,41 +27,41 @@
 
 # # print(now - start)
 
-# # import requests
-# # import json
+# import requests
+# import json
 
-# # base_url = "http://localhost:8000/api/v1/"
+# base_url = "http://localhost:8000/api/v1/"
 
-# # def login():    
-# #     creds = {
-# #         "username":"admin",
-# #         "password":"pass"
-# #     }
-# #     log_in_url = base_url+"user/"
+# def login():    
+#     creds = {
+#         "username":"admin",
+#         "password":"pass"
+#     }
+#     log_in_url = base_url+"user/"
 
-# #     r = requests.post(log_in_url, data= json.dumps(creds))
-# #     print(r.json())
-# #     token = r.json()["token"]
-# #     print(token)
+#     r = requests.post(log_in_url, data= json.dumps(creds))
+#     print(r.json())
+#     token = r.json()["token"]
+#     print(token)
 
-# #     headers = {
-# #         "authorization":token,
-# #     }
-# #     sess = requests.get(base_url+"user", headers=headers)
-# #     print(sess.text)
-# #     return headers
+#     headers = {
+#         "authorization":token,
+#     }
+#     sess = requests.get(base_url+"user", headers=headers)
+#     print(sess.text)
+#     return headers
 
-# # def call(headers, data, url):
-# #     sess = requests.get(base_url+url, headers=headers)
-# #     print(sess.text)
+# def call(headers, data, url):
+#     sess = requests.get(base_url+url, headers=headers)
+#     print(sess.text)
 
-# # if __name__ == "__main__":
-# #     headers = login()
+# if __name__ == "__main__":
+#     headers = login()
     
-# #     # ------------------------------------------- Data Here ----------------------------------------
-# #     data = {}
-# #     url = 'user'
-# #     call(headers, data, url)
+#     # ------------------------------------------- Data Here ----------------------------------------
+#     data = {}
+#     url = 'user'
+#     call(headers, data, url)
 import os
 
 id = 3
