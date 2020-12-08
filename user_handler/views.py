@@ -107,6 +107,7 @@ class UserBaseView(View):
         return JsonResponse(res)
 
 @require_http_methods(['POST'])
+@for_everyone()
 def register_new_user(request):
     json_str = request.body.decode(encoding='UTF-8')
     data_json = json.loads(json_str)

@@ -67,10 +67,10 @@ if __name__ == "__main__":
     
     # ------------------------------------------- Data Here ----------------------------------------
     data = {
-    "first_name": "Bhuwan",
-    "last_name": "Adhikari",
-    "username": "bhuwanadh",
-    "email": "adhikaribhuwan97@gmail.com",
+    "first_name": "Bhsdfuwan",
+    "last_name": "Adhikasdfri",
+    "username": "bhuwanadhasdf",
+    "email": "asdfsadf@gmail.com",
     "password": "asdf",
     "profile": {
         "address": "Pokhara 16 Lamachaur WRC Hostel",
