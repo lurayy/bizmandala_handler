@@ -67,9 +67,9 @@ if __name__ == "__main__":
     
     # ------------------------------------------- Data Here ----------------------------------------
     data = {
-    "first_name": "Bhsdfuwan",
+    "first_name": "Bhsdfasdfuwan",
     "last_name": "Adhikasdfri",
-    "username": "bhuwanadhasdf",
+    "username": "bhuwanadhasddfsdf",
     "email": "asdfsadf@gmail.com",
     "password": "asdf",
     "profile": {

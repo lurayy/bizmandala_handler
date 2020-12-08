@@ -115,6 +115,7 @@ def register_new_user(request):
     new_user.first_name = str(data_json['first_name'])
     new_user.last_name = str(data_json['last_name'])
     Profile.objects.create(
+        user = new_user,
         address = data_json['profile']['address'],
         phone_number = data_json['profile']['phone_number'],
         phone_number2 = data_json['profile']['phone_number2'],
