@@ -13,10 +13,6 @@ class UserBase(AbstractUser):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
-    
-    class Meta(object):
-        unique_together = ('email',)
-
 
 def image_directory_path(instance, filename):
     return 'image/user_{0}/profile_image.jpg'.format(instance.user.username)
