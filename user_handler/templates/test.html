@@ -127,6 +127,7 @@
             type: 'POST',
             url: '/api/v1/erps/',
             data: JSON.stringify(data),
+            headers: {'Authorization' : Cookies.get('token')},
             success: function(data){
                 if (data['status']){
                     $('#loading-logo').hide()
@@ -152,35 +153,82 @@ function get_erps(){
     $.ajax ({
         type: 'GET',
         url: '/api/v1/erps',
+        headers: {'Authorization' : Cookies.get('token')},
         success: function(data){
             console.log('erps : ',data)
             output(data['erps']);        
     }
     });
 }
+
 function output(data){
     data.forEach(erp => {
         var btn
         if (erp['state'] == "running"){
-            btn = '<a href="/api/v1/erps/'+erp['uuid']+'/stop"><button type="button" class="btn btn-danger">Stop</button></a> <a href="http://'+erp['link']+'"><button type="button" class="btn btn-info">Open ERP</button></a>'
+            btn = '<button type="button" class="btn btn-danger" onclick="do_action('+"'"+erp['uuid']+"'"+','+"'"+"stop"+"'"+')" >Stop</button><a href="http://'+erp['link']+'"><button type="button" class="btn btn-info">Open erp</button></a>'
         }
         else if (erp['state'] == "created" || erp['state']=="paused" || erp['state']=="exited"){
-            btn = '<a href="/api/v1/erps/'+erp['uuid']+'/start"><button type="button" class="btn btn-success">Start</button></a> <button onclick= delete_erp("'+erp['uuid']+'")  type="button" class="btn btn-danger">Delete</button>'
+            console.log("here")
+            btn = '<button type="button" class="btn btn-primary" onclick="do_action('+"'"+erp['uuid']+"'"+','+"'"+"start"+"'"+')" >Start</button>  <button onclick= "do_action('+"'"+erp['uuid']+"'"+','+"'"+"delete"+"'"+')"  type="button" class="btn btn-danger">Delete</button>'
         }
-        else if (erp['state'] == "restarting" ){
-            btn = '<a href="/api/v1/erps/'+erp['uuid']+'/start"><button type="button" class="btn btn-secondary">Waiting</button></a>'
+        else if (erp['state'] == "restarting"  ){
+            btn = '<button type="button" class="btn btn-secondary">Waiting</button>'
         }
         $('#table_erp_list').append(
             '<tr><th scope="col">'+erp["company"]+'</td><td>'+erp["address"]+'</td><td>'+erp["state"]+'</td><td>'+erp["status"]+'</td><td>'+erp['credits']['hours_left']+'</td><td>'+btn+'</td></tr>'
         )
-
     });
+}
+
+function do_action(uuid, task){
+    if (task == "stop"){
+        $.ajax({
+        url:'/api/v1/erps/'+uuid+'/stop',
+        type:'GET',
+        headers: {'Authorization' : Cookies.get('token')},
+        success : function(data){
+            console.log(data)
+            // location.reload()
+        },
+        error : function(data){
+            alert("Error : ",data)
+        }
+    })
+    }else if (task == "start"){
+        $.ajax({
+        url:'/api/v1/erps/'+uuid+'/start',
+        type:'GET',
+        headers: {'Authorization' : Cookies.get('token')},
+        success : function(data){
+            console.log(data)
+            location.reload()
+        },
+        error : function(data){
+            alert("Error : ",data)
+        }
+    })
+    }
+    else if (task == "delete"){
+        $.ajax({
+        url:'/api/v1/erps/'+uuid,
+        type:'DELETE',
+        headers: {'Authorization' : Cookies.get('token')},
+        success : function(data){
+            console.log(data)
+            // location.reload()
+        },
+        error : function(data){
+            alert("Error : ",data)
+        }
+    })
+    }
 }
 
 function delete_erp(uuid){
     $.ajax ({
         url:'/api/v1/erps/'+uuid,
         type: 'DELETE',
+        headers: {'Authorization' : Cookies.get('token')},
         beforeSend: function(xhr) {
             xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
         },
@@ -237,6 +285,7 @@ function get_credits(){
     $.ajax ({
         url:'/api/v1/purchase/credits/',
         type: 'GET',
+        headers: {'Authorization' : Cookies.get('token')},
         success: function(data){
             console.log(data['credits'])
             data['credits'].forEach(element => {
@@ -266,6 +315,7 @@ function buy_slots(){
         $.ajax ({
             url:'/api/v1/purchase/',
             type: 'POST',
+            headers: {'Authorization' : Cookies.get('token')},
             data: JSON.stringify(data),
             success: function(data){
                 location.reload()
@@ -278,21 +328,26 @@ function buy_slots(){
 }
 
 function login(){
+    username = "admin";
+    password = "pass";
+    console.log(username, password)
+  
     var creds = {
-            'username' : 'admin',
-            'password' : 'pass'
+        'username' : username,
+        'password' : password
+    }
+    $.ajax ({
+        url:'/api/v1/user/',
+        type: 'POST',
+        data: JSON.stringify(creds),
+        success: function(data){
+            console.log(data)
+            Cookies.set('token',data['token'])
+        },
+        error: function(data){
+            console.log(data)
         }
-        $.ajax ({
-            url:'/api/v1/user/',
-            type: 'POST',
-            data: JSON.stringify(creds),
-            success: function(data){
-                location.reload()
-            },
-            error: function(data){
-                console.log(data)
-            }
-        });
+    });
 }
 
 function test(){
@@ -312,6 +367,7 @@ function test(){
         url:'/api/v1/purchase/',
         data : JSON.stringify(creds),
         type: 'POST',
+        headers: {'Authorization' : Cookies.get('token')},
         beforeSend: function(xhr) {
             xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
         },
@@ -328,6 +384,7 @@ function del_f(){
     $.ajax ({
         url:'/api/v1/buy/bundles/'+$('#del').val(),
         type: 'DELETE',
+        headers: {'Authorization' : Cookies.get('token')},
         beforeSend: function(xhr) {
             xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
         },
@@ -350,6 +407,7 @@ function create_erp(){
         url:'/api/v1/erps/',
         data : JSON.stringify(creds),
         type: 'POST',
+        headers: {'Authorization' : Cookies.get('token')},
         beforeSend: function(xhr) {
             xhr.setRequestHeader("x-csrftoken", getCookie("x-csrftoken"));
         },

@@ -61,6 +61,7 @@ class InvoiceView(View):
             raise Exception('Pure total amount miscalculated.')
         if data_json['paid_amount'] != data_json['bill_amount']:
             raise Exception('Billed amount is not equal to the paid amount.')
+        invoice = False
         invoice = Invoice.objects.create(
             user = request.user,
             bill_amount = data_json['bill_amount'],
@@ -150,3 +151,51 @@ class CreditView(View):
                 'credits' : credits_to_json(credit_s)
             }
             return JsonResponse(response_json)
+
+@for_logged_in()
+def invoice_to_credits(request, uuid):
+    if not uuid:
+        raise Exception("UUID of invoice required.")
+    invoice = Invoice.objects.get(uuid = uuid)
+    json_str = request.body.decode(encoding='UTF-8')
+    data_json = json.loads(json_str)   
+    credits_ = [] 
+    if invoice.is_converted_to_credits:
+        raise Exception('Invoice already converted to credits.')
+    try:
+        if data_json['extend_credit']:
+            for credit_id in data_json['extend_credit']:
+                credit = Credit.objects.get(id = credit_id )
+                credit.hours_left = credit.hours_left+data_json['hours']
+                credit.save()
+                credits_.append(credit)
+        try:
+            top_len = len(data_json['extend_credit'])
+        except:
+            top_len = 0
+        x = data_json['number_of_erps'] - top_len
+        if x > 0:
+            for _ in range (x):
+                credit = Credit.objects.create(
+                    user = request.user,
+                    hours_left = data_json['hours'],
+                    hours_used = 0
+                )
+                credits_.append(credit)
+        response_json = {
+            'status' : True,
+            'invoice' : invoices_to_json([invoice]),
+            'credits' : credits_to_json(credits_)
+        }
+        invoice.is_converted_to_credits = True
+        invoice.save()
+        return JsonResponse(response_json)
+    except Exception as exp:
+        for x in credits_:
+            if x.hours_left == data_json['hours']:
+                x.delete()
+            else:
+                x.hours_left = x.hours_left - data_json['hours']
+                x.save()
+        raise Exception(exp)
+
